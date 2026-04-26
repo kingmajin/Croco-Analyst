@@ -15,13 +15,28 @@ const isOnlyDigits = (str) => /^\d+$/.test(str)
 document.addEventListener("shown.bs.modal", async function (event) {
 
     if (event.target.id === "addFormatModal") {
-        const checkbox = document.getElementById("toRowNoCheck");
 
-        checkbox.addEventListener("change", function () {
+        const toRowCheckbox = document.getElementById("toRowNoCheck");
+        toRowCheckbox.addEventListener("change", function () {
             let input = document.getElementById("formattoRowNo");
             input.value = ""
             input.disabled = this.checked;
         });
+
+        const splitTranCheckbox = document.getElementById("splitTranDet");
+        splitTranCheckbox.addEventListener("change", function () {
+            if (this.checked){
+                document.getElementById("splitTranDiv").style.opacity = "1"
+                document.getElementById("splitTranDiv").style.overflow = "visible"
+                document.getElementById("splitTranDiv").style.height = "60px"
+            }else{
+                document.getElementById("splitTranDiv").style.opacity = "0"
+                document.getElementById("splitTranDiv").style.overflow = "hidden"
+                document.getElementById("splitTranDiv").style.height = "0"
+            }
+        });
+
+
     }
 });
 
@@ -118,16 +133,25 @@ async function populateData(data, selectedFormat){
         }
     });
 
-    const allowedKeys = ["TranDate", "ChequeNo", "TranDetail", "Debit", "Credit", "Balance"];
+    const keyFieldMap = {
+        TranDate: "Date", 
+        ChequeNo: "Cheque No.", 
+        TranDetail: "Transaction Detail", 
+        Debit: "Debit", 
+        Credit: "Credit", 
+        Balance: "Balance",
+        TranNo: "T. Number",
+        TranSource: "T. Source"
+    };
 
     const columns = Object.entries(mappedData[0])
         .map(([key]) => ({
-            title: key,
+            title: keyFieldMap[key],
             field: key,
-            width: (key == "TranDetail") ? 700 : 130
+            width: (key == "TranDetail") ? 360 : ((key == "TranSource") ? 200 : 130)
     }));
 
-    // Destroy old table if exists
+    // Destroy old table if existss
     if (table) {
         table.destroy();
     }
@@ -140,6 +164,7 @@ async function populateData(data, selectedFormat){
         height: "86vh"
     });
 
+    calculateLegends(mappedData)
     visibleDateRange()
     
 }
@@ -154,6 +179,9 @@ async function addFormat(){
     const chequeNo = document.querySelector("#formatChequeNo").value
     const tranDetail = document.querySelector("#formatTransactionDetails").value
     const isSplitTran = document.querySelector("#splitTranDet")
+    const sepetator = document.querySelector("#inputSeperator").value
+    const tranNoIndex = document.querySelector("#inputIndexTran").value
+    const tranSourceIndex = document.querySelector("#inputIndexTranSrc").value
     const debit = document.querySelector("#formatDebit").value
     const credit = document.querySelector("#formatCredit").value
     const balance = document.querySelector("#formatBalance").value
@@ -166,6 +194,17 @@ async function addFormat(){
     if (!isTillEnd.checked){
         if (!isOnlyDigits(toRowNo)){
             window.api.showError("To is not a valid number");
+            return;
+        } 
+    }
+
+    if (isSplitTran.checked){
+        if (sepetator == "" || tranNoIndex == "" || tranSourceIndex == ""){
+            window.api.showError("Seperator, Transaction no. index and transaction source index cannot be empty");
+            return;
+        } 
+        if (!isOnlyDigits(sepetator) || !isOnlyDigits(tranNoIndex) || !isOnlyDigits(tranSourceIndex)){
+            window.api.showError("Seperator, Transaction no. index and transaction source must be number");
             return;
         } 
     }
@@ -185,6 +224,9 @@ async function addFormat(){
         ChequeNo: chequeNo,
         TranDetail: tranDetail,
         IsSplitTran: isSplitTran.checked ? "true" : "false",
+        Seperator: sepetator,
+        TranNoIndex: tranNoIndex,
+        TranSourceIndex: tranSourceIndex,
         Debit: debit,
         Credit: credit,
         Balance: balance
@@ -219,6 +261,9 @@ async function clearAddFormatModal(){
     document.querySelector("#formatChequeNo").value = ""
     document.querySelector("#formatTransactionDetails").value = ""
     document.querySelector("#splitTranDet").checked = false
+    document.querySelector("#inputSeperator").value = ""
+    document.querySelector("#inputIndexTran").value = ""
+    document.querySelector("#inputIndexTranSrc").value = ""
     document.querySelector("#formatDebit").value = ""
     document.querySelector("#formatCredit").value = ""
     document.querySelector("#formatBalance").value = ""
@@ -267,10 +312,22 @@ async function remapData(obj, keyMap) {
         for (const [key, value] of Object.entries(keyMap)) {
             if (allowedKeys.includes(key)){
                 if (Object.hasOwn(element, value)){
+                    
                     tempElement[key] = element[value]
+                    
+                    if (keyMap.IsSplitTran == "true" && key == "TranDetail"){
+                        let tranDetArray = tempElement.TranDetail.split(keyMap.Seperator)
+                        let transactionNumber = tranDetArray[Number(keyMap.TranNoIndex) - 1]
+                        let transactionSource = tranDetArray[Number(keyMap.TranSourceIndex) - 1]
+                        tempElement["TranNo"] = transactionNumber
+                        tempElement["TranSource"] = transactionSource
+                    }
+
                 } 
             }
         }
+
+        
         newObj.push(tempElement)
     });
 
@@ -287,6 +344,8 @@ async function filterByDate(){
             { field: "TranDate", type: "<=", value: toDateRange }
         ]);
     }
+
+    recalculateLegends()
 }
 
 async function clearFilterByDate(){
@@ -296,10 +355,49 @@ async function clearFilterByDate(){
         table.clearFilter();
         table.clearSort();
     }
+    recalculateLegends()
 }
 
 async function calculateLegends(data) {
-    let availableBalance = 0
 
+    let initExpense = 0
 
+    // Calculate the current balance and assigning
+    legends.availableBalance = legends.availableBalance == 0 ? data[data.length -1].Balance : legends.availableBalance
+
+    // Doing some calculations 
+    let currMonth = 0
+    let totalMonths = 0
+    data.forEach(element => {
+        debugger
+        let parsingMonth = element.TranDate.split("-")[1]
+        initExpense += Number(element.Debit)
+        if (currMonth != parsingMonth){
+            currMonth = parsingMonth
+            totalMonths += 1
+        } 
+    });
+
+    // Assigning Expense in Date Range
+    legends.expenseInDate = initExpense.toFixed(2)
+
+    // Calculating and assigning average daily expense
+    legends.averageDailyExpense = (initExpense / data.length).toFixed(2)
+
+    // Calculating and assigning monthly expense
+    legends.averageMonthlyExpense = (initExpense / totalMonths).toFixed(2)
+
+    await assignLegends()
+}
+
+async function assignLegends() {
+    document.querySelector("#balanceAmount").innerHTML = legends.availableBalance
+    document.querySelector("#expenseAmount").innerHTML = legends.expenseInDate
+    document.querySelector("#avgDailyExp").innerHTML = legends.averageDailyExpense
+    document.querySelector("#avgMonthlyExp").innerHTML = legends.averageMonthlyExpense
+}
+
+async function recalculateLegends() {
+    const filteredData = table.getData("active");
+    calculateLegends(filteredData)
 }

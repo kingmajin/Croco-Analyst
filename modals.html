@@ -84,14 +84,24 @@
 
         <div class="mb-1 row">
             <label for="formatTransactionDetails" class="col-sm-2 col-form-label form-label-sm">Tran. Details</label>
-            <div class="col-sm-10 d-flex flex-row align-items-center">
-                <input type="text" class="form-control w-50 form-control-sm" id="formatTransactionDetails">
-                <div class="form-check ms-3 mytooltip">
-                    <span class="mytooltiptext">This will split the transaction details. Only works for Axis Bank.</span>
-                    <input class="form-check-input" type="checkbox" id="splitTranDet">
-                    <label class="form-check-label" for="splitTranDet">
-                        Split transaction details
-                    </label>
+            <div class="col-sm-10">
+                <div class="d-flex flex-row align-items-center">
+                    <input type="text" class="form-control w-50 form-control-sm" id="formatTransactionDetails">
+                    <div class="form-check ms-3 mytooltip">
+                        <span class="mytooltiptext">This will split the transaction details. Only works for Axis Bank.</span>
+                        <input class="form-check-input" type="checkbox" id="splitTranDet">
+                        <label class="form-check-label" for="splitTranDet">
+                            Split transaction details
+                        </label>
+                    </div>
+                </div>
+                <div id="splitTranDiv" class="d-flex flex-row align-items-center" style="overflow: hidden; height: 0px; transition: 0.3s; opacity: 0;">
+                    <label for="inputSeperator" class="col-form-label form-label-sm" >Sepetator :</label>
+                    <input style="width: 5%;" type="text" class="form-control form-control-sm me-5" id="inputSeperator">
+                    <label for="inputIndexTran" class="col-form-label form-label-sm" >Transaction No. Index :</label>
+                    <input style="width: 5%;" type="text" class="form-control form-control-sm me-5" id="inputIndexTran">
+                    <label for="inputIndexTranSrc" class="col-form-label form-label-sm" >Transaction Source Index :</label>
+                    <input style="width: 5%;" type="text" class="form-control form-control-sm me-5" id="inputIndexTranSrc">
                 </div>
             </div>
         </div>
