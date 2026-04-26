@@ -1,0 +1,23 @@
+{
+  "name": "statement-analyser-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Ashutosh Singh",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^41.2.2"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "electron-store": "^11.0.2",
+    "tabulator-tables": "^6.4.0",
+    "xlsx": "^0.18.5"
+  }
+}

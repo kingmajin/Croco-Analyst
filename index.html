@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Tabulator -->
+    <link href="./node_modules/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="./mystyle.css">
+
+    <title>Statement Analyzer</title>
+</head>
+<body style="overflow: hidden;">
+
+    <div class="header">
+        <div style="display: flex;flex-direction: row;">
+            <h3 style="margin: 5px 0; margin-left: 60px;"><i class="fa fa-line-chart" aria-hidden="true"></i></h3>
+        </div>
+            
+        <!-- Button trigger modal -->
+        <div style="margin-right: 60px;"> 
+            <button type="button" class="btn btn-light" style="padding-top: 1px; padding-bottom: 1px;" data-bs-toggle="modal" data-bs-target="#uploadSheetModal">
+                Upload Sheet
+            </button>
+            <button type="button" class="btn btn-light" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-bars" style="font-size:20px;"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addFormatModal">
+                    <i class="fa fa-th me-2"></i>
+                    Add a Format
+                </a>
+                <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#viewFormatModal">
+                    <i class="fa fa-th me-2"></i>
+                    View all Formats
+                </a>
+                <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-target="#uploadTagModal"><i class="fa fa-upload" aria-hidden="true" style="margin-right: 10px;"></i>Upload Tag Data</a>
+                <a style="cursor: pointer;" class="dropdown-item" onclick="ExportTagData()"><i class="fa fa-download" aria-hidden="true" style="margin-right: 10px;"></i>Download Tag Data</a>
+                <a style="cursor: pointer;" class="dropdown-item" onclick="DeleteTagData()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete Tag Data</a>
+            </div>
+        </div>
+    </div> 
+
+    <!-- Main Container -->
+    <div class="main-container d-flex flex-direction">
+        <div>
+            <div class="collapse collapse-horizontal" id="sidePannel">
+                <div class="card card-body d-flex flex-column" style="width: 250px; height: 94vh; background-color: rgb(201, 199, 207); border: 0; padding: 8px;">
+                    
+                    <div>
+                        <!-- Card1 -->
+                        <div class="card" style="width: 99%; padding: 8px 12px;">
+                            <div class="card-body p-0">
+                                <p class="card-text mb-0" Style="color: green; font-weight: 500;">Available Balance</p>
+                                <h5 id="balanceAmount">0</h5>
+                            </div>
+                        </div>
+
+                        <!-- Card2 -->
+                        <div class="card mt-1" style="width: 99%; padding: 8px 12px;">
+                            <div class="card-body p-0">
+                                <p class="card-text mb-0" Style="color: rgb(0, 23, 128); font-weight: 500;">Expense in date range</p>
+                                <h5 id="expenseAmount">0</h5>
+                            </div>
+                        </div>
+
+                        <!-- Card3 -->
+                        <div class="card mt-1" style="width: 99%; padding: 8px 12px;">
+                            <div class="card-body p-0">
+                                <p class="card-text mb-0" Style="color: rgb(0, 23, 128); font-weight: 500;">Average daily expense</p>
+                                <h5 id="expenseAmount">0</h5>
+                            </div>
+                        </div>
+
+                        <!-- Card4 -->
+                        <div class="card mt-1" style="width: 99%; padding: 8px 12px;">
+                            <div class="card-body p-0">
+                                <p class="card-text mb-0" style="color: rgb(0, 23, 128); font-weight: 500;">Average monthly expense</p>
+                                <h5 id="expenseAmount">0</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height: -webkit-fill-available;"></div>
+                    <div>
+                        <button style="width: 100%;" onclick="ShowAnalitics()" class="btn btn-warning">Show Analitics <i class="fa fa-bar-chart" aria-hidden="true"></i></button>
+                        <button style="width: 100%;" type="button" data-toggle="modal" class="btn btn-danger" aria-hidden="true">Generate Report <i class="fa fa-file-o"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- This is the expand collapse buttom -->
+        <p>
+            <button class="btn btn-dark btn-sm mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#sidePannel" aria-expanded="false" aria-controls="sidePannel"><i class="fa fa-arrows-h" aria-hidden="true"></i></button>
+        </p>
+
+        <div>
+            
+            <!-- This is a date range picker -->
+            <div id="dateRangeContainer" class="align-items-center mt-3 ms-3" style="display: none;">
+                <div class="d-flex flex-row align-items-center">
+                    <p style="margin: 0; margin-right: 5px;">From</p>
+                    <input type="date" class="form-control form-control-sm" id="fromDateRange">
+                </div>
+
+                <div class="d-flex flex-row align-items-center ms-3">
+                    <p style="margin: 0; margin-right: 5px;">To</p>
+                    <input type="date" class="form-control form-control-sm" id="toDateRange">
+                </div>
+                <button class="btn btn-info ms-3 btn-sm" id="filterDateRange" onclick="filterByDate()"><i class="fa fa-filter" ></i></button>
+                <button class="btn btn-info ms-1 btn-sm" id="refreshTable" onclick="clearFilterByDate()"><i class="fa fa-refresh"></i></button>
+            </div>
+            
+
+            <!-- This is the xl data table  -->
+            <div  class="ui selectable green table me-2 ms-2" id="data-table" style="overflow-y: auto;"></div>
+        
+        </div>
+        
+    </div>
+
+
+
+    <!-- This container is for all the modals {must stay at the bottom}-->
+    <div id="modal-container"></div>
+
+    <!-- This is to load all the modals -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        fetch("modals.html")
+            .then(res => res.text())
+            .then(data => {
+            document.getElementById("modal-container").innerHTML = data;
+            });
+        });
+    </script>
+
+    <script src="renderer.js"></script>
+    <script src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
