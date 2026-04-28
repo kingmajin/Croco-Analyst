@@ -54,3 +54,19 @@
     color: rgb(95, 39, 78);
     border-radius: 2px;
 }
+
+/* .categoryColumn{
+    background-color: #fdefbf;
+} */
+
+.debitColumn{
+    /* background-color: #ffdddd; */
+    font-weight: 500;
+    color: rgb(165, 0, 0);
+}
+
+.creditColumn{
+    /* background-color: #c9e5c5; */
+    font-weight: 500;
+    color: green;
+}

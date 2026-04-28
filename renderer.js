@@ -145,7 +145,8 @@ async function populateData(data, selectedFormat){
         Balance: "Balance",
         TranNo: "T. Number",
         TranSource: "T. Source",
-        SrcTag: "Tag"
+        SrcTag: "Tag",
+        Category: "Category"
     };
 
     const columns = Object.entries(mappedData[0])
@@ -154,7 +155,6 @@ async function populateData(data, selectedFormat){
             field: key,
             width: (key == "TranDetail") ? 300 : ((key == "TranSource") ? 200 : 115),
             formatter: function(key) {
-                debugger
                 let field = key.getField();
                 let value = key.getValue();
                 if(field == "SrcTag" && value != ""){
@@ -165,6 +165,21 @@ async function populateData(data, selectedFormat){
             }
         }));
 
+    // debugger
+
+    // Assign coloring not a good approach bit please dont judge
+    columns.forEach(column => {
+        if (column.field == "Category"){
+            column["cssClass"] = "categoryColumn"
+        }
+        if ((column.field == "Debit")){
+            column["cssClass"] = "debitColumn"
+        }
+        if ((column.field == "Credit")){
+            column["cssClass"] = "creditColumn"
+        }
+    });
+        
     // Destroy old table if existss
     if (table) {
         table.destroy();
@@ -354,19 +369,42 @@ async function remapData(obj, keyMap) {
                     tempElement[key] = element[value]
                     
                     if (keyMap.IsSplitTran == "true" && key == "TranDetail"){
+
+                        // Seperating the transaction details
                         let tranDetArray = tempElement.TranDetail.split(keyMap.Seperator)
                         let transactionNumber = tranDetArray[Number(keyMap.TranNoIndex) - 1]
                         let transactionSource = tranDetArray[Number(keyMap.TranSourceIndex) - 1] == null ? "" : tranDetArray[Number(keyMap.TranSourceIndex) - 1]
                         tempElement["TranNo"] = transactionNumber
                         tempElement["TranSource"] = transactionSource
 
+                        // Mapping tag data
                         if (tagMap[transactionSource.trim()] != null || tagMap[transactionSource.trim()] != undefined){
                             tempElement["SrcTag"] = tagMap[transactionSource.trim()]
                         }else{
                             tempElement["SrcTag"] = ""
                         }
-                    }
 
+                        // Maping category data
+                        for (let category in categoryMap) {
+
+                            let tempKeysList = categoryMap[category]
+                            let tempTrSource = transactionSource.toLowerCase()
+
+                            let catFoundFlag = false
+                            tempKeysList.forEach(element => {
+                                if(tempTrSource.includes(element)){
+                                    catFoundFlag = true
+                                }
+                            });
+
+                            if (catFoundFlag){
+                                tempElement["Category"] = category
+                                break
+                            }else{
+                                tempElement["Category"] = ""
+                            }
+                        }
+                    }
                 } 
             }
         }
