@@ -100,3 +100,11 @@ ipcMain.handle('get-mappings', () => {
 ipcMain.handle('show-error', async (event, message) => {
   dialog.showErrorBox('Error', message);
 });
+
+ipcMain.handle('set-tags', (event, data) => {
+    store.set('tags', data);
+});
+
+ipcMain.handle('get-tags', () => {
+    return store.get('tags');
+});

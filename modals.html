@@ -159,3 +159,25 @@
     </div>
 </div>
 </div>
+
+<!-- Modal to assign tag-->
+<div class="modal fade" id="assignTagModal" tabindex="-1" aria-labelledby="assignTagModal" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Assign Tag</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex flex-row align-items-center">
+            <input id="assignTagKey" class="form-control form-control-sm w-50" type="text" value="Disabled Key" disabled readonly>
+            <p style="margin: 0 10px;">:</p>
+            <input class="form-control form-control-sm w-50" id="assignTagInput" placeholder="Enter tag here">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-info" data-bs-dismiss="modal" onclick="assignTag()">Okay</button>
+    </div>
+    </div>
+</div>
+</div>

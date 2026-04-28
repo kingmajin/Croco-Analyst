@@ -11,6 +11,10 @@ contextBridge.exposeInMainWorld('api', {
 
   getMappings: () => ipcRenderer.invoke('get-mappings'),
 
+  setTags: (data) => ipcRenderer.invoke('set-tags', data),
+
+  getTags: () => ipcRenderer.invoke('get-tags'),
+
   showError: (msg) => ipcRenderer.invoke('show-error', msg)
   
 });

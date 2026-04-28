@@ -10,6 +10,8 @@ let legends = {
     averageMonthlyExpense: 0
 }
 
+let tableFilter=[]
+
 const isOnlyDigits = (str) => /^\d+$/.test(str)
 
 document.addEventListener("shown.bs.modal", async function (event) {
@@ -133,6 +135,7 @@ async function populateData(data, selectedFormat){
         }
     });
 
+    console.log(mappedData)
     const keyFieldMap = {
         TranDate: "Date", 
         ChequeNo: "Cheque No.", 
@@ -141,15 +144,26 @@ async function populateData(data, selectedFormat){
         Credit: "Credit", 
         Balance: "Balance",
         TranNo: "T. Number",
-        TranSource: "T. Source"
+        TranSource: "T. Source",
+        SrcTag: "Tag"
     };
 
     const columns = Object.entries(mappedData[0])
         .map(([key]) => ({
             title: keyFieldMap[key],
             field: key,
-            width: (key == "TranDetail") ? 360 : ((key == "TranSource") ? 200 : 130)
-    }));
+            width: (key == "TranDetail") ? 300 : ((key == "TranSource") ? 200 : 115),
+            formatter: function(key) {
+                debugger
+                let field = key.getField();
+                let value = key.getValue();
+                if(field == "SrcTag" && value != ""){
+                    return `<span class="tagStyle">${value}</span>`;
+                }else{
+                    return value;
+                }   
+            }
+        }));
 
     // Destroy old table if existss
     if (table) {
@@ -161,7 +175,33 @@ async function populateData(data, selectedFormat){
         data: mappedData,
         columns: columns,
         layout: "fitColumns",
-        height: "86vh"
+        height: "86vh",
+        rowContextMenu:[
+            {
+                label:"Add tag to the source",
+                action:function(e, row){
+
+                    let selectedtranSource = row.getData().TranSource
+
+                    document.querySelector("#assignTagKey").value = selectedtranSource
+
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('assignTagModal')).show();
+                }
+            },
+            {
+                label:"Remove tag from the source",
+                action:function(e, row){
+                    let selectedRowTag = row.getData().TranSource
+                    removeTag(selectedRowTag)
+                }
+            },
+            {
+                label:"Exclude from calculation",
+                action:function(e, row){
+                    excludeRow(row.getData().TranDetail)
+                }
+            }
+        ]
     });
 
     calculateLegends(mappedData)
@@ -287,10 +327,6 @@ async function displayAllFormats(){
         height: "300px"
     });
 
-    // formatTable.on("rowSelectionChanged", function(data, rows){
-    //     console.log(data)
-    // });
-
     document.querySelector("#viewFormatSpinner").style.display = "None"
 }
 
@@ -305,6 +341,8 @@ async function remapData(obj, keyMap) {
     
     let newObj = []
 
+    const tagMap =  await window.api.getTags();
+
     const allowedKeys = ["TranDate", "ChequeNo", "TranDetail", "Debit", "Credit", "Balance"];
 
     obj.forEach(element => {
@@ -318,15 +356,20 @@ async function remapData(obj, keyMap) {
                     if (keyMap.IsSplitTran == "true" && key == "TranDetail"){
                         let tranDetArray = tempElement.TranDetail.split(keyMap.Seperator)
                         let transactionNumber = tranDetArray[Number(keyMap.TranNoIndex) - 1]
-                        let transactionSource = tranDetArray[Number(keyMap.TranSourceIndex) - 1]
+                        let transactionSource = tranDetArray[Number(keyMap.TranSourceIndex) - 1] == null ? "" : tranDetArray[Number(keyMap.TranSourceIndex) - 1]
                         tempElement["TranNo"] = transactionNumber
                         tempElement["TranSource"] = transactionSource
+
+                        if (tagMap[transactionSource.trim()] != null || tagMap[transactionSource.trim()] != undefined){
+                            tempElement["SrcTag"] = tagMap[transactionSource.trim()]
+                        }else{
+                            tempElement["SrcTag"] = ""
+                        }
                     }
 
                 } 
             }
         }
-
         
         newObj.push(tempElement)
     });
@@ -335,14 +378,21 @@ async function remapData(obj, keyMap) {
 }
 
 async function filterByDate(){
+    // Todo
+    // Filter is bugged if you select any date and filter and without clearing you select another date and filter it gets bugged
+
     if (table != null){
         let fromDateRange = document.querySelector("#fromDateRange").value
         let toDateRange = document.querySelector("#toDateRange").value
 
-        table.setFilter([
-            { field: "TranDate", type: ">=", value: fromDateRange },
-            { field: "TranDate", type: "<=", value: toDateRange }
-        ]);
+        if (fromDateRange != ""){
+            tableFilter.push({ field: "TranDate", type: ">=", value: fromDateRange })
+        }
+        if (toDateRange != ""){
+            tableFilter.push({ field: "TranDate", type: "<=", value: toDateRange })
+        }
+
+        table.setFilter(tableFilter);
     }
 
     recalculateLegends()
@@ -351,11 +401,14 @@ async function filterByDate(){
 async function clearFilterByDate(){
     document.querySelector("#fromDateRange").value = ""
     document.querySelector("#toDateRange").value = ""
+    tableFilter = []
+
     if (table != null){
         table.clearFilter();
         table.clearSort();
     }
     recalculateLegends()
+    console.log(await window.api.getTags()) //jojo
 }
 
 async function calculateLegends(data) {
@@ -368,24 +421,31 @@ async function calculateLegends(data) {
     // Doing some calculations 
     let currMonth = 0
     let totalMonths = 0
+    let currDay = 0
+    let totalDays = 0
     data.forEach(element => {
-        debugger
         let parsingMonth = element.TranDate.split("-")[1]
+        let parsingDay = element.TranDate.split("-")[2]
+
         initExpense += Number(element.Debit)
         if (currMonth != parsingMonth){
             currMonth = parsingMonth
             totalMonths += 1
+        } 
+        if (currDay != parsingDay){
+            currDay = parsingDay
+            totalDays += 1
         } 
     });
 
     // Assigning Expense in Date Range
     legends.expenseInDate = initExpense.toFixed(2)
 
-    // Calculating and assigning average daily expense
-    legends.averageDailyExpense = (initExpense / data.length).toFixed(2)
+    // Calculating and assigning average daily expense 
+    legends.averageDailyExpense = (initExpense / (totalDays == 0 ? 1 : totalDays)).toFixed(2)
 
     // Calculating and assigning monthly expense
-    legends.averageMonthlyExpense = (initExpense / totalMonths).toFixed(2)
+    legends.averageMonthlyExpense = (initExpense / (totalMonths == 0 ? 1 : totalMonths)).toFixed(2)
 
     await assignLegends()
 }
@@ -400,4 +460,70 @@ async function assignLegends() {
 async function recalculateLegends() {
     const filteredData = table.getData("active");
     calculateLegends(filteredData)
+}
+
+async function assignTag() {
+
+    let assignedKey = document.querySelector("#assignTagKey").value.trim()
+    let assignedValue = document.querySelector("#assignTagInput").value.trim()
+    
+    let availableTags = await window.api.getTags();
+
+    if (availableTags == undefined || availableTags == null){
+        availableTags = {}
+    }
+    
+    availableTags[assignedKey] = assignedValue
+
+    await window.api.setTags(availableTags);
+
+    table.getRows().forEach(row => {
+    const data = row.getData();
+
+    if (data.TranSource.trim() === assignedKey) {
+        row.update({
+            SrcTag: assignedValue
+        });
+    }
+    });
+
+}
+
+async function removeTag(key) {
+
+    let availableTags = await window.api.getTags();
+
+    if (availableTags == undefined || availableTags == null){
+        availableTags = {}
+    }
+
+    table.getRows().forEach(row => {
+    const data = row.getData();
+
+    if (data.TranSource.trim() === key.trim()) {
+        row.update({
+            SrcTag: ""
+        });
+    }
+    });
+
+    delete availableTags[key.trim()];
+
+    await window.api.setTags(availableTags);
+
+}
+
+async function clearAllTag(key) {
+
+    let availableTags = {}
+    await window.api.setTags(availableTags);
+}
+
+async function excludeRow(rowTranDetail){
+    if (table != null){
+        tableFilter.push({ field: "TranDetail", type: "!=", value: rowTranDetail })
+    }
+    
+    table.setFilter(tableFilter);
+    recalculateLegends()
 }

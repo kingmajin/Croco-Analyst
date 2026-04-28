@@ -44,7 +44,7 @@
                 </a>
                 <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-target="#uploadTagModal"><i class="fa fa-upload" aria-hidden="true" style="margin-right: 10px;"></i>Upload Tag Data</a>
                 <a style="cursor: pointer;" class="dropdown-item" onclick="ExportTagData()"><i class="fa fa-download" aria-hidden="true" style="margin-right: 10px;"></i>Download Tag Data</a>
-                <a style="cursor: pointer;" class="dropdown-item" onclick="DeleteTagData()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete Tag Data</a>
+                <a style="cursor: pointer;" class="dropdown-item" onclick="clearAllTag()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete all Tags</a>
             </div>
         </div>
     </div> 
@@ -132,19 +132,21 @@
     <!-- This container is for all the modals {must stay at the bottom}-->
     <div id="modal-container"></div>
 
-    <!-- This is to load all the modals -->
+    <!-- This script is to load all the modals -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
         fetch("modals.html")
             .then(res => res.text())
             .then(data => {
-            document.getElementById("modal-container").innerHTML = data;
+                document.getElementById("modal-container").innerHTML = data;
             });
         });
+
     </script>
 
-    <script src="renderer.js"></script>
-    <script src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="renderer.js"></script>
+
 </body>
 </html>
