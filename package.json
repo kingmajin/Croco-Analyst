@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "copy-fa": "cp -r node_modules/@fortawesome/fontawesome-free/webfonts assets/fontawesome/ && cp node_modules/@fortawesome/fontawesome-free/css/all.min.css assets/fontawesome/css/"
   },
   "keywords": [],
   "author": "Ashutosh Singh",
@@ -15,6 +16,7 @@
     "electron": "^41.2.2"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "bootstrap": "^5.3.8",
     "electron-store": "^11.0.2",
     "tabulator-tables": "^6.4.0",

@@ -1,25 +1,63 @@
-.header {
-    position: fixed; 
-    width: 100%; 
-    right: 0px;
-    top: 0px;
-    z-index: +1; 
+body{
+    overflow: hidden;
+}
+
+.header-container {
     display: flex;
     flex-direction: row; 
     justify-content: space-between; 
     align-items: center; 
-    padding: 0px 30px; 
-    color: rgb(75, 75, 75);
-    background-color: #b5b5b5;
-    box-shadow: 0px 6px 6px rgb(156, 156, 156);;
+    margin: 0.5rem 30px;
+}
+.header-container h5{
+    margin: 0;
+}
+.main-application-page{
+    display: flex;
+    flex-direction: row;
 }
 
+.sidebar {
+      height: 100vh;
+      width: 220px;
+      background: #081A36;
+      position: fixed;
+      color: white;
+      left: 0;
+      top: 0;
+      padding-top: 20px;
+    }
 
+.sidebar p {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    margin: 0 10px;
+    border-radius: 6px;
+    transition: 0.1s;
+    cursor: pointer;
+}
+
+/* .sidebar p:hover {
+    background: #1b263b;
+    color: white;
+} */
+
+.sidebar p.active {
+    background: #158C45;
+    color: white;
+    margin: 0 10px;
+}
 .main-container{
     width: 100%;
+    margin-left: 220px;
     height: 100vh;
-    padding-top: 45px;
-    margin: auto;
+    background-color: #F6F8FB;
+}
+
+#data-table {
+  width: 1300px;
+  height: 100%;
 }
 
 /* Tooltip container */

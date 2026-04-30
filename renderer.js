@@ -5,6 +5,7 @@ let table
 
 let legends = {
     availableBalance: 0,
+    totalCredited: 0,
     expenseInDate: 0,
     averageDailyExpense: 0,
     averageMonthlyExpense: 0
@@ -13,6 +14,10 @@ let legends = {
 let tableFilter=[]
 
 const isOnlyDigits = (str) => /^\d+$/.test(str)
+
+document.addEventListener("DOMContentLoaded", function () {
+    loadFormats()
+});
 
 document.addEventListener("shown.bs.modal", async function (event) {
 
@@ -42,23 +47,20 @@ document.addEventListener("shown.bs.modal", async function (event) {
     }
 });
 
-document.addEventListener("shown.bs.modal", async function (event) {
-    if (event.target.id === "uploadSheetModal") {
+async function loadFormats() {
 
-        const data = await getFormats();
-        const select = document.querySelector("#selectFormatCB");
+    const data = await getFormats();
+    const select = document.querySelector("#selectFormatCB");
 
-        select.innerHTML = "<option selected>Select Format</option>";
+    select.innerHTML = "<option selected>Select Format</option>";
 
-        data.forEach(item => {
-            const option = document.createElement("option");
-            option.value = item.Title;
-            option.textContent = item.Title;
-            select.appendChild(option);
-        });
-    }
-});
-
+    data.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.Title;
+        option.textContent = item.Title;
+        select.appendChild(option);
+    });
+}
 document.addEventListener("shown.bs.modal", async function (event) {
   if (event.target.id === "viewFormatModal") {
     document.querySelector("#viewFormatSpinner").style.display = "None"
@@ -74,8 +76,14 @@ async function selectFile(){
     if (!filePath) {
         filePath = null
         window.api.showError("No file selected");
+        document.querySelector("#selectedFileName").innerHTML = "No file selected"
         return;
     }
+
+    const fileName = filePath.split('\\').pop(); 
+    const fileExt = fileName.split('.').pop();
+
+    document.querySelector("#selectedFileName").innerHTML = fileName
 
 }
 
@@ -153,7 +161,7 @@ async function populateData(data, selectedFormat){
         .map(([key]) => ({
             title: keyFieldMap[key],
             field: key,
-            width: (key == "TranDetail") ? 300 : ((key == "TranSource") ? 200 : 115),
+            width: (key == "TranDetail") ? 230 : ((key == "TranSource") ? 200 : 115),
             formatter: function(key) {
                 let field = key.getField();
                 let value = key.getValue();
@@ -189,8 +197,8 @@ async function populateData(data, selectedFormat){
     table = new Tabulator("#data-table", {
         data: mappedData,
         columns: columns,
-        layout: "fitColumns",
-        height: "86vh",
+        height: "100%",
+        layout: "fitData",
         rowContextMenu:[
             {
                 label:"Add tag to the source",
@@ -415,19 +423,29 @@ async function remapData(obj, keyMap) {
     return newObj
 }
 
-async function filterByDate(){
-    // Todo
-    // Filter is bugged if you select any date and filter and without clearing you select another date and filter it gets bugged
+async function filterDataTable(){
+    
+    tableFilter = []
 
     if (table != null){
         let fromDateRange = document.querySelector("#fromDateRange").value
         let toDateRange = document.querySelector("#toDateRange").value
+        let fromAmt = document.querySelector("#fromAmtRange").value
+        let toAmt = document.querySelector("#toAmtRange").value
+        let selectAmtFlterType = document.querySelector("#selectAmtFilter").value
 
+        debugger
         if (fromDateRange != ""){
             tableFilter.push({ field: "TranDate", type: ">=", value: fromDateRange })
         }
         if (toDateRange != ""){
             tableFilter.push({ field: "TranDate", type: "<=", value: toDateRange })
+        }
+        if (fromAmt != ""){
+            tableFilter.push({ field: selectAmtFlterType, type: ">=", value: Number(fromAmt) })
+        }
+        if (toAmt != ""){
+            tableFilter.push({ field: selectAmtFlterType, type: "<=", value: Number(toAmt) })
         }
 
         table.setFilter(tableFilter);
@@ -436,9 +454,12 @@ async function filterByDate(){
     recalculateLegends()
 }
 
-async function clearFilterByDate(){
+async function clearFilterofDataTable(){
     document.querySelector("#fromDateRange").value = ""
     document.querySelector("#toDateRange").value = ""
+    document.querySelector("#fromAmtRange").value = ""
+    document.querySelector("#toAmtRange").value = ""
+    
     tableFilter = []
 
     if (table != null){
@@ -452,29 +473,42 @@ async function clearFilterByDate(){
 async function calculateLegends(data) {
 
     let initExpense = 0
+    let temptotalCredit = 0
 
-    // Calculate the current balance and assigning
-    legends.availableBalance = legends.availableBalance == 0 ? data[data.length -1].Balance : legends.availableBalance
-
-    // Doing some calculations 
+    // Doing some calculations JK
     let currMonth = 0
     let totalMonths = 0
     let currDay = 0
     let totalDays = 0
+
     data.forEach(element => {
         let parsingMonth = element.TranDate.split("-")[1]
         let parsingDay = element.TranDate.split("-")[2]
 
+        // This part is calculating total expense in date range
         initExpense += Number(element.Debit)
+        
+        // This part is calculating total credited in date range
+        temptotalCredit += Number(element.Credit)
+
+        // This part is calculating the number of months in date range
         if (currMonth != parsingMonth){
             currMonth = parsingMonth
             totalMonths += 1
         } 
+
+        // This part is calculating the number of days in date range
         if (currDay != parsingDay){
             currDay = parsingDay
             totalDays += 1
         } 
     });
+
+    // Calculate the current balance and assigning
+    legends.availableBalance = legends.availableBalance == 0 ? data[data.length -1].Balance : legends.availableBalance
+
+    // Calculating and assigning total amount credited in date range
+    legends.totalCredited = temptotalCredit.toFixed(2)
 
     // Assigning Expense in Date Range
     legends.expenseInDate = initExpense.toFixed(2)
@@ -490,6 +524,7 @@ async function calculateLegends(data) {
 
 async function assignLegends() {
     document.querySelector("#balanceAmount").innerHTML = legends.availableBalance
+    document.querySelector("#totalCredited").innerHTML = legends.totalCredited
     document.querySelector("#expenseAmount").innerHTML = legends.expenseInDate
     document.querySelector("#avgDailyExp").innerHTML = legends.averageDailyExpense
     document.querySelector("#avgMonthlyExp").innerHTML = legends.averageMonthlyExpense

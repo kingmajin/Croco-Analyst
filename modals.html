@@ -1,33 +1,3 @@
-<!-- Modal to Upload Sheet-->
-<div class="modal fade" id="uploadSheetModal" tabindex="-1" aria-labelledby="uploadSheetModal" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">
-        <h5 class="modal-title">Upload Sheet</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-        <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-
-            <!-- Input file -->
-            <button id="fileUpload" class="btn btn-dark w-25" onclick="selectFile()">Select File</button>
-            
-            <select id="selectFormatCB" class="form-select w-50" aria-label="Default select example">
-                <option selected>Select Format</option>
-            </select>
-
-        </div>
-
-
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearSelectFileModal()">Close</button>
-        <button id="uploadConfirm" type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="uploadConfirm()">Upload</button>
-    </div>
-    </div>
-</div>
-</div>
-
 <!-- Modal to add format-->
 <div class="modal fade" id="addFormatModal" tabindex="-1" aria-labelledby="addFormatModalLabel" aria-hidden="true">
 <div class="modal-dialog modal-xl modal-dialog-centered">

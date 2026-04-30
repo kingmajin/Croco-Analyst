@@ -15,7 +15,7 @@ const categoryMap = {
         "toiletries", "soap", "shampoo", "toothpaste", "general"
     ],
 
-    Food: [
+    "Food / Snacks": [
         "swiggy", "zomato", "dominos", "pizza hut", "kfc",
         "mcdonald's", "burger king", "barbeque nation",
         "haldiram's", "subway", "cafe coffee day", "starbucks",
