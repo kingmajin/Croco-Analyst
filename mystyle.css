@@ -10,7 +10,7 @@ body{
     margin: 0.5rem 30px;
 }
 .header-container h5{
-    margin: 0;
+    margin: 4px 0;
 }
 .main-application-page{
     display: flex;
@@ -25,7 +25,6 @@ body{
       color: white;
       left: 0;
       top: 0;
-      padding-top: 20px;
     }
 
 .sidebar p {
@@ -60,6 +59,13 @@ body{
   height: 100%;
 }
 
+.format-container{
+    width: 100%;
+    margin-left: 220px;
+    height: 100vh;
+    background-color: #F6F8FB;
+}
+
 /* Tooltip container */
 .mytooltip {
     position: relative;
@@ -88,9 +94,10 @@ body{
 
 .tagStyle{
     padding: 4px 10px;
-    background-color: rgb(255, 157, 231);
-    color: rgb(95, 39, 78);
-    border-radius: 2px;
+    background-color: #ffa5006b;
+    color: #694400;
+    border-radius: 5px;
+    font-weight: 500;
 }
 
 /* .categoryColumn{

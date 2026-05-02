@@ -24,14 +24,13 @@
 
         <!-- This is a Sidebar -->
         <div class="sidebar">
-            <div class="logo">Statement Analyzer</div>
+            <div class="logo" style="margin: 10px; text-align: center;"><img src="./assets/croco-analyst-logo.png" alt="logo" style="width: 105px; text-align: center;"></div>
 
-            <div style="display: flex; flex-direction: column; height: 95%; justify-content: space-between;">
-                <div>
-                    <p href="#" class="active"><i class="fa-solid fa-house me-2"></i>Dashboard</p>
-                    <p href="#"><i class="fa-solid fa-chart-bar me-2"></i>Analyze</p>
-                    <p href="#"><i class="fa-solid fa-newspaper me-2"></i>Reports</p>
-                    <p href="#"><i class="fa-solid fa-file-export me-2"></i>Export</p>
+            <div style="display: flex; flex-direction: column; height: 88%; justify-content: space-between;">
+                <div id="pageNavigation">
+                    <p class="active" onclick="switchPage(this)"><i class="fa-solid fa-house me-2"></i>Dashboard</p>
+                    <p onclick="switchPage(this)"><i class="fa-solid fa-signs-post me-2"></i>Format</p>
+                    <p onclick="switchPage(this)"><i class="fa-solid fa-newspaper me-2"></i>Generate Report</p>
                 </div>
                 <div>
                     <p href="#"><i class="fa-solid fa-gear me-2"></i>Settings</p>
@@ -52,14 +51,6 @@
                         <i class="fa-solid fa-bars" style="font-size:20px;"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                        <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addFormatModal">
-                            <i class="fa fa-th me-2"></i>
-                            Add a Format
-                        </a>
-                        <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#viewFormatModal">
-                            <i class="fa fa-th me-2"></i>
-                            View all Formats
-                        </a>
                         <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-target="#uploadTagModal"><i class="fa fa-upload" aria-hidden="true" style="margin-right: 10px;"></i>Upload Tag Data</a>
                         <a style="cursor: pointer;" class="dropdown-item" onclick="ExportTagData()"><i class="fa fa-download" aria-hidden="true" style="margin-right: 10px;"></i>Download Tag Data</a>
                         <a style="cursor: pointer;" class="dropdown-item" onclick="clearAllTag()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete all Tags</a>
@@ -115,7 +106,7 @@
             </div>
 
             <!-- This is display legends container -->
-            <div class="card" style="display: flex; flex-direction: row; justify-content: space-evenly; align-items: center; padding: 10px 25px; margin: 0.5rem 5px;"> 
+            <div class="card" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 10px 25px; margin: 0.5rem 5px;"> 
                 <div class="card" style="width: 250px; padding: 8px 12px;">
                     <div class="card-body p-0">
                         <p class="card-text mb-0" Style="color: green; font-weight: 500;">Current Balance</p>
@@ -150,7 +141,134 @@
                         <h5 id="avgMonthlyExp">0</h5>
                     </div>
                 </div>
-            <div>
+            </div>
+        </div>
+
+        <div class="format-container" style="display: none;">
+
+            <div class="header-container"><h5>Statement Format</h5></div>
+            <hr style="border-color: #9b9b9b; margin: 0.5rem 0;">
+
+            <div class="d-flex flex-row" style="height: 93%;">
+                <div class="card w-50" style="margin: 0.5rem 5px; padding: 20px;">
+
+                    <h5>Add a Format</h5>
+                    <div class="mb-1 row mt-3">
+                        <label for="formatTitle" class="col-sm-2 col-form-label form-label-sm">Title</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control form-control-sm" id="formatTitle">
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formatfromRowNo" class="col-sm-2 col-form-label form-label-sm">From Row</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control w-50 form-control-sm" id="formatfromRowNo" placeholder="Enter number here">
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formattoRowNo" class="col-sm-2 col-form-label form-label-sm">To Row</label>
+                        <div class="col-sm-10 d-flex flex-row align-items-center">
+                            <input type="text" class="form-control w-50 form-control-sm" id="formattoRowNo" placeholder="Enter number here">
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" id="toRowNoCheck">
+                                <label class="form-check-label" for="toRowNoCheck">
+                                    Till the end
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <h5 class="mt-3" style="color: grey">Map Columns</h5>
+                    <div class="mb-1 row">
+                        <label for="formatTransactionDate" class="col-sm-2 col-form-label form-label-sm">Tran. Date</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control form-control-sm" id="formatTransactionDate">
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formatChequeNo" class="col-sm-2 col-form-label form-label-sm">Cheque No.</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control form-control-sm" id="formatChequeNo">
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formatTransactionDetails" class="col-sm-2 col-form-label form-label-sm">Details</label>
+                        <div class="col-sm-10">
+                            <div class="d-flex flex-row align-items-center">
+                                <input type="text" class="form-control w-50 form-control-sm" id="formatTransactionDetails">
+                                <div class="form-check ms-3 mytooltip">
+                                    <span class="mytooltiptext">This will split the transaction details. This will unlock the special power of this tool.</span>
+                                    <input class="form-check-input" type="checkbox" id="splitTranDet">
+                                    <label class="form-check-label" for="splitTranDet">
+                                        Split transaction details
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="splitTranDiv" style="overflow: hidden; height: 0px; transition: 0.3s; opacity: 0;">
+
+                                <div class="row mt-2">
+                                    <label for="inputSeperator" class="col-sm-3 col-form-label form-label-sm">Sepetator</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control form-control-sm" id="inputSeperator">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <label for="inputIndexTran" class="col-sm-3 col-form-label form-label-sm">Tran. No. Index</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control form-control-sm" id="inputIndexTran">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <label for="inputIndexTranSrc" class="col-sm-3 col-form-label form-label-sm">Tran. Src. Index</label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control form-control-sm" id="inputIndexTranSrc">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formatDebit" class="col-sm-2 col-form-label form-label-sm">Debit</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control form-control-sm" id="formatDebit">
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formatCredit" class="col-sm-2 col-form-label form-label-sm">Credit</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control form-control-sm" id="formatCredit">
+                        </div>
+                    </div>
+                
+                    <div class="mb-1 row">
+                        <label for="formatBalance" class="col-sm-2 col-form-label form-label-sm">Balance</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control form-control-sm" id="formatBalance">
+                        </div>
+                    </div>
+                    <div style="height: 100%;"></div>
+                    <div style="display: flex; flex-direction: row;">
+                        <button type="button" class="btn btn-primary w-25 me-3" onclick="addFormat()">Add</button>
+                        <button type="button" class="btn btn-secondary" onclick="clearAddFormatForm()">Clear</button>
+                    </div>
+        
+                </div>
+                <div class="card w-50" style="margin: 0.5rem 5px; padding: 20px;">
+                    <h5>List of formats</h5>
+                    <div class="spinner-border spinner-border-sm ms-3" role="status" id="viewFormatSpinner">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="ui selectable red table mt-3" id="view-format-table"></div>
+                    <button type="button" class="btn btn-danger w-25" onclick="clearFormats()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Clear All</button>
+                </div>
+            </div>
         </div>
 
     </div>

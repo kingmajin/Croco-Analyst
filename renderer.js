@@ -2,6 +2,7 @@
 
 let filePath = null
 let table
+let formatTable
 
 let legends = {
     availableBalance: 0,
@@ -17,43 +18,16 @@ const isOnlyDigits = (str) => /^\d+$/.test(str)
 
 document.addEventListener("DOMContentLoaded", function () {
     loadFormats()
-});
-
-document.addEventListener("shown.bs.modal", async function (event) {
-
-    if (event.target.id === "addFormatModal") {
-
-        const toRowCheckbox = document.getElementById("toRowNoCheck");
-        toRowCheckbox.addEventListener("change", function () {
-            let input = document.getElementById("formattoRowNo");
-            input.value = ""
-            input.disabled = this.checked;
-        });
-
-        const splitTranCheckbox = document.getElementById("splitTranDet");
-        splitTranCheckbox.addEventListener("change", function () {
-            if (this.checked){
-                document.getElementById("splitTranDiv").style.opacity = "1"
-                document.getElementById("splitTranDiv").style.overflow = "visible"
-                document.getElementById("splitTranDiv").style.height = "60px"
-            }else{
-                document.getElementById("splitTranDiv").style.opacity = "0"
-                document.getElementById("splitTranDiv").style.overflow = "hidden"
-                document.getElementById("splitTranDiv").style.height = "0"
-            }
-        });
-
-
-    }
+    addCheckboxRule()
+    displayAllFormats()
 });
 
 async function loadFormats() {
-
     const data = await getFormats();
     const select = document.querySelector("#selectFormatCB");
 
     select.innerHTML = "<option selected>Select Format</option>";
-
+    console.log(data)
     data.forEach(item => {
         const option = document.createElement("option");
         option.value = item.Title;
@@ -61,12 +35,82 @@ async function loadFormats() {
         select.appendChild(option);
     });
 }
-document.addEventListener("shown.bs.modal", async function (event) {
-  if (event.target.id === "viewFormatModal") {
-    document.querySelector("#viewFormatSpinner").style.display = "None"
-    await displayAllFormats()
-  }
-});
+
+async function addCheckboxRule() {
+    const toRowCheckbox = document.getElementById("toRowNoCheck");
+    toRowCheckbox.addEventListener("change", function () {
+        let input = document.getElementById("formattoRowNo");
+        input.value = ""
+        input.disabled = this.checked;
+    });
+
+    const splitTranCheckbox = document.getElementById("splitTranDet");
+    splitTranCheckbox.addEventListener("change", function () {
+        if (this.checked){
+            document.getElementById("splitTranDiv").style.opacity = "1"
+            document.getElementById("splitTranDiv").style.overflow = "visible"
+            document.getElementById("splitTranDiv").style.height = "130px"
+        }else{
+            document.getElementById("splitTranDiv").style.opacity = "0"
+            document.getElementById("splitTranDiv").style.overflow = "hidden"
+            document.getElementById("splitTranDiv").style.height = "0"
+        }
+    });
+}
+
+async function switchPage(selectedNav){
+    const dashboardPage = document.querySelector(".main-container")
+    const addFormatPage = document.querySelector(".format-container")
+
+    const pageNavigationDiv = document.querySelector("#pageNavigation")
+    const navigationElements = pageNavigationDiv.querySelectorAll('p');
+    navigationElements.forEach((p, index) => {
+        p.classList.remove('active')
+    });
+
+    let selectedNavText = selectedNav.innerText.trim()
+
+    switch (selectedNavText) {
+    case "Dashboard":
+        selectedNav.classList.add('active');
+        dashboardPage.style.display = "block"
+        addFormatPage.style.display = "none"
+        break;
+    case "Format":
+        selectedNav.classList.add('active');
+        addFormatPage.style.display = "block"
+        dashboardPage.style.display = "none"
+        break;
+    case "View Format":
+        break;
+    case "Generate Report":
+        break;
+    default:
+        console.log("Not a valid page")
+    }
+}
+
+async function displayGreenToast(message) {
+    const container = document.querySelector('.toast-container');
+    const toastEl = document.getElementById('myGreenToast');
+    toastEl.innerText = message
+    const toast = new bootstrap.Toast(toastEl, {
+        delay: 1200,
+        autohide: true
+    });
+    toast.show();
+}
+
+async function displayRedToast(message) {
+    const container = document.querySelector('.toast-container');
+    const toastEl = document.getElementById('myRedToast');
+    toastEl.innerText = message
+    const toast = new bootstrap.Toast(toastEl, {
+        delay: 1200,
+        autohide: true
+    });
+    toast.show();
+}
 
 async function selectFile(){
 
@@ -85,10 +129,6 @@ async function selectFile(){
 
     document.querySelector("#selectedFileName").innerHTML = fileName
 
-}
-
-const clearSelectFileModal = () => {
-    filePath = null
 }
 
 async function uploadConfirm(){
@@ -119,11 +159,7 @@ async function uploadConfirm(){
 
     const result = await window.api.readExcel(filePath, selectedFormat.FromRowNo, toRow);
     
-    console.log("Parsed Data:", result);
-    
     populateData(result, selectedFormat)
-
-    clearSelectFileModal()
 
 }
 
@@ -172,8 +208,6 @@ async function populateData(data, selectedFormat){
                 }   
             }
         }));
-
-    // debugger
 
     // Assign coloring not a good approach bit please dont judge
     columns.forEach(column => {
@@ -228,7 +262,6 @@ async function populateData(data, selectedFormat){
     });
 
     calculateLegends(mappedData)
-    visibleDateRange()
     
 }
 
@@ -249,6 +282,7 @@ async function addFormat(){
     const credit = document.querySelector("#formatCredit").value
     const balance = document.querySelector("#formatBalance").value
 
+
     if (!isOnlyDigits(fromRowNo)){
         window.api.showError("From is not a valid number");
         return;
@@ -266,8 +300,8 @@ async function addFormat(){
             window.api.showError("Seperator, Transaction no. index and transaction source index cannot be empty");
             return;
         } 
-        if (!isOnlyDigits(sepetator) || !isOnlyDigits(tranNoIndex) || !isOnlyDigits(tranSourceIndex)){
-            window.api.showError("Seperator, Transaction no. index and transaction source must be number");
+        if (!isOnlyDigits(tranNoIndex) || !isOnlyDigits(tranSourceIndex)){
+            window.api.showError("Transaction no. index and transaction source must be number");
             return;
         } 
     }
@@ -278,7 +312,17 @@ async function addFormat(){
         maps = []
     }
 
+
+    let Sno = 0
+
+    if (maps.length < 1){
+        Sno = 1
+    }else{
+        Sno = maps[maps.length-1].Sno + 1
+    }
+
     const mapping = {
+        Sno: Sno,
         Title: title,
         FromRowNo: fromRowNo,
         ToRowNo: toRowNo,
@@ -287,9 +331,9 @@ async function addFormat(){
         ChequeNo: chequeNo,
         TranDetail: tranDetail,
         IsSplitTran: isSplitTran.checked ? "true" : "false",
-        Seperator: sepetator,
-        TranNoIndex: tranNoIndex,
-        TranSourceIndex: tranSourceIndex,
+        Seperator:  isSplitTran.checked ? sepetator : "",
+        TranNoIndex: isSplitTran.checked ? tranNoIndex : "",
+        TranSourceIndex: isSplitTran.checked ? tranSourceIndex : "",
         Debit: debit,
         Credit: credit,
         Balance: balance
@@ -300,7 +344,11 @@ async function addFormat(){
     // Save
     await window.api.saveMappings(maps);
 
-    clearAddFormatModal()
+    displayGreenToast("Saved Successfully!")
+
+    clearAddFormatForm()
+    displayAllFormats()
+    loadFormats()
 }
 
 async function getFormats(){
@@ -311,9 +359,25 @@ async function getFormats(){
 async function clearFormats(){
     // Clear
     await window.api.saveMappings([]);
+    displayAllFormats()
+    loadFormats()
 }
 
-async function clearAddFormatModal(){
+async function deleteFormat(id){
+    
+    const maps = await window.api.getMappings();
+
+    const updatedMaps = maps.filter(item => item.Sno !== id);
+
+    await window.api.saveMappings(updatedMaps);
+
+    displayRedToast("Deleted a format!")
+
+    displayAllFormats()
+    loadFormats()
+}
+
+async function clearAddFormatForm(){
 
     document.querySelector("#formatTitle").value = ""
     document.querySelector("#formatfromRowNo").value = ""
@@ -323,7 +387,7 @@ async function clearAddFormatModal(){
     document.querySelector("#formatTransactionDate").value = ""
     document.querySelector("#formatChequeNo").value = ""
     document.querySelector("#formatTransactionDetails").value = ""
-    document.querySelector("#splitTranDet").checked = false
+    // document.querySelector("#splitTranDet").checked = false
     document.querySelector("#inputSeperator").value = ""
     document.querySelector("#inputIndexTran").value = ""
     document.querySelector("#inputIndexTranSrc").value = ""
@@ -339,25 +403,31 @@ async function displayAllFormats(){
 
     let data = await window.api.getMappings();
 
-    let formatTable = new Tabulator("#view-format-table", {
+    // Destroy old table if existss
+    if (formatTable) {
+        formatTable.destroy();
+    }
+
+    formatTable = new Tabulator("#view-format-table", {
         data: data,
         // selectableRows:true,
         columns:[
+            {title:"S.no.", field:"Sno"},
             {title:"Title", field:"Title"},
-            {title:"FromRowNo", field:"FromRowNo"},
-            {title:"ToRowNo", field:"ToRowNo"}
+            {title:"From Row No", field:"FromRowNo"},
+            {title:"To Row No", field:"ToRowNo"},
+            {title: "Action", formatter: () => 
+                `<i style="color: #bd0000;" class="fa-solid fa-trash-can fs-5"></i>`,
+                cellClick: function (e, cell) {
+                    const rowData = cell.getRow().getData();
+                    deleteFormat(rowData.Sno);
+                }
+            }
         ],
-        height: "300px"
+        height: "100%"
     });
 
     document.querySelector("#viewFormatSpinner").style.display = "None"
-}
-
-async function visibleDateRange() {
-    document.querySelector("#dateRangeContainer").style.display = "flex"
-}
-async function invisibleDateRange() {
-    document.querySelector("#dateRangeContainer").style.display = "none"
 }
 
 async function remapData(obj, keyMap) {

@@ -1,134 +1,3 @@
-<!-- Modal to add format-->
-<div class="modal fade" id="addFormatModal" tabindex="-1" aria-labelledby="addFormatModalLabel" aria-hidden="true">
-<div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-
-    <div class="modal-header">
-        <h5 class="modal-title" id="addFormatModalLabel">Add a format</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-    </div>
-
-    <div class="modal-body">
-
-        <div class="mb-1 row">
-            <label for="formatTitle" class="col-sm-2 col-form-label form-label-sm">Title</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control form-control-sm" id="formatTitle">
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formatfromRowNo" class="col-sm-2 col-form-label form-label-sm" >From Row No.</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control w-25 form-control-sm" id="formatfromRowNo">
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formattoRowNo" class="col-sm-2 col-form-label form-label-sm">To Row No.</label>
-            <div class="col-sm-10 d-flex flex-row align-items-center">
-                <input type="text" class="form-control w-25 form-control-sm" id="formattoRowNo">
-                <div class="form-check ms-3">
-                    <input class="form-check-input" type="checkbox" id="toRowNoCheck">
-                    <label class="form-check-label" for="toRowNoCheck">
-                        Till the end
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <h5 class="mt-3">Map Columns</h5>
-        <div class="mb-1 row">
-            <label for="formatTransactionDate" class="col-sm-2 col-form-label form-label-sm">Tran. Date</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control w-50 form-control-sm" id="formatTransactionDate">
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formatChequeNo" class="col-sm-2 col-form-label form-label-sm">Cheque No.</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control w-50 form-control-sm" id="formatChequeNo">
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formatTransactionDetails" class="col-sm-2 col-form-label form-label-sm">Tran. Details</label>
-            <div class="col-sm-10">
-                <div class="d-flex flex-row align-items-center">
-                    <input type="text" class="form-control w-50 form-control-sm" id="formatTransactionDetails">
-                    <div class="form-check ms-3 mytooltip">
-                        <span class="mytooltiptext">This will split the transaction details. Only works for Axis Bank.</span>
-                        <input class="form-check-input" type="checkbox" id="splitTranDet">
-                        <label class="form-check-label" for="splitTranDet">
-                            Split transaction details
-                        </label>
-                    </div>
-                </div>
-                <div id="splitTranDiv" class="d-flex flex-row align-items-center" style="overflow: hidden; height: 0px; transition: 0.3s; opacity: 0;">
-                    <label for="inputSeperator" class="col-form-label form-label-sm" >Sepetator :</label>
-                    <input style="width: 5%;" type="text" class="form-control form-control-sm me-5" id="inputSeperator">
-                    <label for="inputIndexTran" class="col-form-label form-label-sm" >Transaction No. Index :</label>
-                    <input style="width: 5%;" type="text" class="form-control form-control-sm me-5" id="inputIndexTran">
-                    <label for="inputIndexTranSrc" class="col-form-label form-label-sm" >Transaction Source Index :</label>
-                    <input style="width: 5%;" type="text" class="form-control form-control-sm me-5" id="inputIndexTranSrc">
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formatDebit" class="col-sm-2 col-form-label form-label-sm">Debit</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control w-50 form-control-sm" id="formatDebit">
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formatCredit" class="col-sm-2 col-form-label form-label-sm">Credit</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control w-50 form-control-sm" id="formatCredit">
-            </div>
-        </div>
-
-        <div class="mb-1 row">
-            <label for="formatBalance" class="col-sm-2 col-form-label form-label-sm">Balance</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control w-50 form-control-sm" id="formatBalance">
-            </div>
-        </div>
-
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearAddFormatModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="addFormat()">Add</button>
-    </div>
-
-    </div>
-</div>
-</div>
-
-<!-- Modal to View Formats-->
-<div class="modal fade" id="viewFormatModal" tabindex="-1" aria-labelledby="viewFormatModal" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">
-        <h5 class="modal-title">List of formats</h5>
-        <div class="spinner-border spinner-border-sm ms-3" role="status" id="viewFormatSpinner">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-        <div  class="ui selectable red table" id="view-format-table"></div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-danger" onclick="clearFormats()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Clear All</button>
-        <button type="button" class="btn btn-info" data-bs-dismiss="modal">Okay</button>
-        <!-- <button id="uploadConfirm" type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="uploadConfirm()">Upload</button> -->
-    </div>
-    </div>
-</div>
-</div>
 
 <!-- Modal to assign tag-->
 <div class="modal fade" id="assignTagModal" tabindex="-1" aria-labelledby="assignTagModal" aria-hidden="true">
@@ -150,4 +19,18 @@
     </div>
     </div>
 </div>
+</div>
+
+<!-- This is Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="myGreenToast" class="toast align-items-center text-bg-success border-0 p-3" role="alert">
+        <div class="toast-body">
+            <h5>Successful Attempt</h5>
+        </div>
+    </div>
+    <div id="myRedToast" class="toast align-items-center text-bg-danger border-0 p-3" role="alert">
+        <div class="toast-body">
+            <h5>Unsuccessfull Attempt</h5>
+        </div>
+    </div>
 </div>
