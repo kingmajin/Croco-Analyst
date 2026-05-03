@@ -174,8 +174,21 @@ async function populateData(data, selectedFormat){
     let mappedData = await remapData(data, selectedFormat)
     
     mappedData.forEach(element => {
-        if (element.TranDate) {
-            element.TranDate = element.TranDate.split("-").reverse().join("-");
+        if (isNaN(element.TranDate)) {
+            let delimiter = element.TranDate[2] 
+            element.TranDate = element.TranDate.split(delimiter).reverse().join(delimiter);
+        }else{
+            let tempDate = ((param) => {
+                const date = new Date((param - 25569) * 86400 * 1000);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+
+                return `${day}-${month}-${year}`;
+            })(element.TranDate)
+            let delimiter = tempDate[2] 
+            element.TranDate = tempDate.split(delimiter).reverse().join(delimiter);
         }
     });
 
@@ -443,8 +456,14 @@ async function remapData(obj, keyMap) {
         for (const [key, value] of Object.entries(keyMap)) {
             if (allowedKeys.includes(key)){
                 if (Object.hasOwn(element, value)){
+                    debugger
+
+                    if (key == "Debit" || key == "Credit"){
+                        tempElement[key] = isNaN(Number(element[value])) ? 0 : Number(element[value])
+                    }else{
+                        tempElement[key] = element[value]
+                    }
                     
-                    tempElement[key] = element[value]
                     
                     if (keyMap.IsSplitTran == "true" && key == "TranDetail"){
 
@@ -469,8 +488,8 @@ async function remapData(obj, keyMap) {
                             let tempTrSource = transactionSource.toLowerCase()
 
                             let catFoundFlag = false
-                            tempKeysList.forEach(element => {
-                                if(tempTrSource.includes(element)){
+                            tempKeysList.forEach(cate => {
+                                if(tempTrSource.includes(cate)){
                                     catFoundFlag = true
                                 }
                             });
@@ -504,7 +523,6 @@ async function filterDataTable(){
         let toAmt = document.querySelector("#toAmtRange").value
         let selectAmtFlterType = document.querySelector("#selectAmtFilter").value
 
-        debugger
         if (fromDateRange != ""){
             tableFilter.push({ field: "TranDate", type: ">=", value: fromDateRange })
         }
@@ -550,16 +568,18 @@ async function calculateLegends(data) {
     let totalMonths = 0
     let currDay = 0
     let totalDays = 0
-
+    debugger
     data.forEach(element => {
         let parsingMonth = element.TranDate.split("-")[1]
         let parsingDay = element.TranDate.split("-")[2]
 
         // This part is calculating total expense in date range
-        initExpense += Number(element.Debit)
+        // initExpense += isNaN(Number(element.Debit)) ? 0 : Number(element.Debit)
+        initExpense += element.Debit
         
         // This part is calculating total credited in date range
-        temptotalCredit += Number(element.Credit)
+        // temptotalCredit += isNaN(Number(element.Credit)) ? 0 : Number(element.Credit)
+        temptotalCredit += element.Credit
 
         // This part is calculating the number of months in date range
         if (currMonth != parsingMonth){
