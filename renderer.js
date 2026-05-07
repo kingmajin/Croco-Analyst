@@ -61,6 +61,10 @@ async function addCheckboxRule() {
 }
 
 async function loadSelectCategoryFilter() {
+
+    if (categoryMap == null || categoryMap == undefined){
+        return
+    }
     let categoryList = Object.keys(categoryMap);
 
     const categorySelect = document.querySelector("#selectCategory");
@@ -76,6 +80,11 @@ async function loadSelectCategoryFilter() {
 
 async function loadSelectTagFilter() {
     const tagMap =  await window.api.getTags();
+
+    if (tagMap == null || tagMap == undefined){
+        return
+    }
+
     let tagList = Object.values(tagMap);
 
     const tagSelect = document.querySelector("#selectTag");
@@ -480,8 +489,8 @@ async function remapData(obj, keyMap) {
     
     let newObj = []
 
-    const tagMap =  await window.api.getTags();
-
+    const tagMap =  await window.api.getTags() == undefined ? [] : await window.api.getTags()
+    
     const allowedKeys = ["TranDate", "ChequeNo", "TranDetail", "Debit", "Credit", "Balance"];
 
     obj.forEach(element => {
@@ -512,7 +521,7 @@ async function remapData(obj, keyMap) {
                         }else{
                             tempElement["SrcTag"] = ""
                         }
-
+                        
                         // Maping category data
                         for (let category in categoryMap) {
 
