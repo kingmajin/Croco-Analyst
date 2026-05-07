@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require('electron')
-const { ipcMain, dialog } = require('electron');
+const { ipcMain, dialog, shell } = require('electron');
 
 const Store = require('electron-store').default;
 
@@ -99,7 +99,7 @@ ipcMain.handle('get-mappings', () => {
 });
 
 ipcMain.handle('show-error', async (event, message) => {
-  dialog.showErrorBox('Error', message);
+  dialog.showErrorBox('Validation Error', message);
 });
 
 ipcMain.handle('set-tags', (event, data) => {
@@ -108,4 +108,8 @@ ipcMain.handle('set-tags', (event, data) => {
 
 ipcMain.handle('get-tags', () => {
     return store.get('tags');
+});
+
+ipcMain.handle("open-url", async (event, url) => {
+  await shell.openExternal(url);
 });

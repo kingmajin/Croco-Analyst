@@ -1,22 +1,35 @@
 {
-  "name": "statement-analyser-app",
+  "name": "croco-analyst-app",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "copy-fa": "cp -r node_modules/@fortawesome/fontawesome-free/webfonts assets/fontawesome/ && cp node_modules/@fortawesome/fontawesome-free/css/all.min.css assets/fontawesome/css/"
+    "build": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.croco.analyst",
+    "productName": "Croco Analyst",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "assets/croco-analyst-ico.ico"
+    }
   },
   "keywords": [],
   "author": "Ashutosh Singh",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^41.2.2"
+    "electron": "^41.2.2",
+    "electron-builder": "^26.8.1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",
+    "apexcharts": "^5.10.6",
     "bootstrap": "^5.3.8",
     "electron-store": "^11.0.2",
     "tabulator-tables": "^6.4.0",

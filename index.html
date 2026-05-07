@@ -16,7 +16,7 @@
 
     <link rel="stylesheet" href="./mystyle.css">
 
-    <title>Statement Analyzer</title>
+    <title>Croco Analyst</title>
 </head>
 <body>
 
@@ -24,17 +24,17 @@
 
         <!-- This is a Sidebar -->
         <div class="sidebar">
-            <div class="logo" style="margin: 10px; text-align: center;"><img src="./assets/croco-analyst-logo.png" alt="logo" style="width: 105px; text-align: center;"></div>
+            <div class="logo" style="margin: 10px; text-align: center;"><img src="./assets/croco-analyst-ico.ico.ico" alt="logo" style="width: 105px; text-align: center;"></div>
 
             <div style="display: flex; flex-direction: column; height: 88%; justify-content: space-between;">
                 <div id="pageNavigation">
                     <p class="active" onclick="switchPage(this)"><i class="fa-solid fa-house me-2"></i>Dashboard</p>
                     <p onclick="switchPage(this)"><i class="fa-solid fa-signs-post me-2"></i>Format</p>
-                    <p onclick="switchPage(this)"><i class="fa-solid fa-newspaper me-2"></i>Generate Report</p>
+                    <!-- <p onclick="switchPage(this)"><i class="fa-solid fa-newspaper me-2"></i>Generate Report</p> -->
                 </div>
                 <div>
-                    <p href="#"><i class="fa-solid fa-gear me-2"></i>Settings</p>
-                    <p href="#"><i class="fa-solid fa-circle-info me-2"></i></i>About</p>
+                    <!-- <p href="#"><i class="fa-solid fa-gear me-2"></i>Settings</p> -->
+                    <p onclick="openAbout()"><i class="fa-solid fa-circle-info me-2"></i></i>About</p>
                 </div>
             </div>
         </div>
@@ -46,7 +46,7 @@
                 <div>
                     <h5>Dashboard</h5>
                 </div>
-                <div>
+                <!-- <div>
                     <button type="button" class="btn btn-light btn-sm" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa-solid fa-bars" style="font-size:20px;"></i>
                     </button>
@@ -55,15 +55,15 @@
                         <a style="cursor: pointer;" class="dropdown-item" onclick="ExportTagData()"><i class="fa fa-download" aria-hidden="true" style="margin-right: 10px;"></i>Download Tag Data</a>
                         <a style="cursor: pointer;" class="dropdown-item" onclick="clearAllTag()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete all Tags</a>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <hr style="border-color: #9b9b9b; margin: 0.5rem 0;">
 
             <!-- This is upload file container -->
             <div class="card d-flex flex-row align-items-center" style="margin: 0.5rem 5px;">
-                <div class="card d-flex flex-row align-items-center" style="width: 30%; background-color: #F6F8FB; margin: 10px 25px;">
-                    <i class="fa-regular fa-file-lines fs-3" style="color: #158C45; margin: 12px 10px;"></i>
+                <div class="card d-flex flex-row align-items-center" style="width: 30%; background-color: #F6F8FB; margin: 2px 25px;">
+                    <i class="fa-regular fa-file-lines fs-3" style="color: #158C45; margin: 8px 10px;"></i>
                     <p id="selectedFileName" style="margin: 0; width: 58%;">No file selected</p>
                     <button id="fileUpload" class="btn btn-dark btn-sm w-25" style="background-color: #081A36;" onclick="selectFile()">Select File</button>
                 </div>
@@ -71,37 +71,75 @@
                     <option selected>Select Format</option>
                 </select>
                 <div style="width: 30%;"></div>
-                <button id="uploadConfirm" type="button" class="btn btn-success" style="width: 15%;" onclick="uploadConfirm()"><i class="fa-solid fa-person-running"></i>Start</button>
+                <button id="uploadConfirm" type="button" class="btn btn-success" style="width: 15%;" onclick="uploadConfirm()">Start<i class="fa-solid fa-person-running ms-2"></i></button>
+
             </div>
 
-            <!-- This is table and filter container -->
-            <div class="card" style="margin: 0.5rem 5px; padding: 10px 25px; height: 72%;">
+            <!-- This is table, filter and charts container -->
+            <div class="card" style="margin: 0.5rem 5px; padding: 10px 25px; height: 75%;">
 
                 <!-- this is filters container-->
                 <div class="d-flex flex-row align-items-center">
-                    <h5 style="margin: 0; margin-right: 5px; font-size: 14px;">Date From :</h5>
-                    <input type="date" class="form-control form-control-sm" style="width: 120px;" id="fromDateRange">
+                    <div style="margin: 0 3px 0 10px;">
+                        <h5 style="margin: 0; font-size: 14px;">Date From</h5>
+                        <input type="date" class="form-control form-control-sm" style="width: 120px;" id="fromDateRange">
+                    </div>
+                    <div style="margin: 0 10px 0 3px;">
+                        <h5 style="margin: 0; font-size: 14px;">Date To</h5>
+                        <input type="date" class="form-control form-control-sm" style="width: 120px;" id="toDateRange">
+                    </div>
+                    <div style="margin: 0 3px 0 10px;">
+                        <h5 style="margin: 0; font-size: 14px;">Min Amount</h5>
+                        <input type="text" class="form-control form-control-sm" style="width: 90px;" id="fromAmtRange">
+                    </div>
+                    <div style="margin: 0 3px 0 3px;">
+                        <h5 style="margin: 0; font-size: 14px;">Max Amount</h5>
+                        <input type="text" class="form-control form-control-sm" style="width: 90px;" id="toAmtRange">
+                    </div>
+                    <div style="margin: 17px 10px 0 3px;">
+                        <select id="selectAmtFilter" class="form-select form-select-sm" style="width: 90px;">
+                            <option value="Debit">Debit</option>
+                            <option value="Credit">Credit</option>
+                        </select>
+                    </div>
+                    <div style="margin: 17px 10px 0 10px;">
+                        <select id="selectCategory" class="form-select form-select-sm" style="width: 160px;">
+                            <option selected>Select Category</option>
+                        </select>
+                    </div>
+                    <div style="margin: 17px 10px 0 10px;">
+                        <select id="selectTag" class="form-select form-select-sm" style="width: 160px;">
+                            <option selected>Select Tag</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-success btn-sm" id="filterDateRange" style="margin-left: 30px; margin-top: 17px;" onclick="filterDataTable()">Apply Filter</button>
+                    <button class="btn btn-secondary ms-1 btn-sm" id="refreshTable" style="margin-top: 17px;" onclick="clearFilterofDataTable()">Reset</button>
+
+                    <button class="btn btn-warning btn-sm" id="displayCharts" style="margin-left: 30px; width: 140px; margin-top: 17px;" onclick="displayCharts(this)">Show Charts<i class="fa-solid fa-chart-line ms-2"></i></button>
                     
-                    <h5 style="margin: 0; margin-left: 10px; margin-right: 5px; font-size: 14px;">Date To :</h5>
-                    <input type="date" class="form-control form-control-sm" style="width: 120px;" id="toDateRange">
-
-                    <h5 style="margin: 0; margin-left: 50px; margin-right: 5px; font-size: 14px;">Amount From :</h5>
-                    <input type="text" class="form-control form-control-sm" style="width: 90px;" id="fromAmtRange">
-
-                    <h5 style="margin: 0; margin-left: 10px; margin-right: 5px; font-size: 14px;">Amount To :</h5>
-                    <input type="text" class="form-control form-control-sm" style="width: 90px;" id="toAmtRange">
-
-                    <select id="selectAmtFilter" class="form-select form-select-sm" style="margin-left: 10px; width: 90px;">
-                        <option value="Debit">Debit</option>
-                        <option value="Credit">Credit</option>
-                    </select>
-
-                    <button class="btn btn-success btn-sm" id="filterDateRange" style="margin-left: 50px;" onclick="filterDataTable()">Apply Filter</button>
-                    <button class="btn btn-secondary ms-1 btn-sm" id="refreshTable" onclick="clearFilterofDataTable()">Reset</button>
                 </div>
 
-                <!-- This is the data table container -->
-                <div  class="ui selectable green table" id="data-table"></div>
+                <div style="margin: 0; height: 91%;">
+                    <!-- This is the data table container -->
+                    <div class="ui selectable green table" id="data-table"></div>
+
+                    <!-- This is chart container -->
+                    <div id="data-charts" style="display: none;">
+                        <div style="display: flex; flex-direction: row;">
+                            <div style="display: flex; flex-direction: column; width: 100%;">
+                                <div id="dailyExpenseLineChart" style="margin-top: 12px;"></div>
+                                <div style="display: flex; flex-direction: row; justify-content: space-between; margin-top: 5px;">
+                                    <div id="monthlyExpenseLineChart"></div>
+                                    <div id="weeklyChart" style="margin-right: 20px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div id="categoryChart" style="margin-top: 12px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
             </div>
 
@@ -116,14 +154,14 @@
 
                 <div class="card" style="width: 250px; padding: 8px 12px;">
                     <div class="card-body p-0">
-                        <p class="card-text mb-0" Style="color: green; font-weight: 500;">Total amount credited</p>
+                        <p class="card-text mb-0" Style="color: green; font-weight: 500;">Total Credited</p>
                         <h5 id="totalCredited">0</h5>
                     </div>
                 </div>
 
                 <div class="card" style="width: 250px; padding: 8px 12px;">
                     <div class="card-body p-0">
-                        <p class="card-text mb-0" Style="color: red; font-weight: 500;">Expense in date range</p>
+                        <p class="card-text mb-0" Style="color: red; font-weight: 500;">Total Expense</p>
                         <h5 id="expenseAmount">0</h5>
                     </div>
                 </div>
@@ -291,7 +329,11 @@
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+    <script src="./node_modules/apexcharts/dist/apexcharts.min.js"></script>
+
     <script src="data.js"></script>
+    <script src="charts.js"></script>
     <script src="renderer.js"></script>
 
 </body>

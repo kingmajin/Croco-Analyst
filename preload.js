@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('api', {
 
   getTags: () => ipcRenderer.invoke('get-tags'),
 
-  showError: (msg) => ipcRenderer.invoke('show-error', msg)
+  showError: (msg) => ipcRenderer.invoke('show-error', msg),
+
+  openUrl: (url) => ipcRenderer.invoke("open-url", url)
   
 });

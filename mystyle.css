@@ -58,6 +58,10 @@ body{
   width: 1300px;
   height: 100%;
 }
+#data-charts{
+      width: 1300px;
+  height: 100%;
+}
 
 .format-container{
     width: 100%;

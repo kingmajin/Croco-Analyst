@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
     loadFormats()
     addCheckboxRule()
     displayAllFormats()
+    loadSelectCategoryFilter()
+    loadSelectTagFilter()
 });
 
 async function loadFormats() {
@@ -55,6 +57,35 @@ async function addCheckboxRule() {
             document.getElementById("splitTranDiv").style.overflow = "hidden"
             document.getElementById("splitTranDiv").style.height = "0"
         }
+    });
+}
+
+async function loadSelectCategoryFilter() {
+    let categoryList = Object.keys(categoryMap);
+
+    const categorySelect = document.querySelector("#selectCategory");
+
+    categorySelect.innerHTML = "<option selected>Select Category</option>";
+    categoryList.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        categorySelect.appendChild(option);
+    });
+}
+
+async function loadSelectTagFilter() {
+    const tagMap =  await window.api.getTags();
+    let tagList = Object.values(tagMap);
+
+    const tagSelect = document.querySelector("#selectTag");
+
+    tagSelect.innerHTML = "<option selected>Select Tag</option>";
+    tagList.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        tagSelect.appendChild(option);
     });
 }
 
@@ -141,7 +172,8 @@ async function uploadConfirm(){
 
     const selectedFormatValue = document.getElementById("selectFormatCB").value;
 
-    if (selectedFormatValue == ""){
+    if (selectedFormatValue == "Select Format" || selectedFormatValue == "" ){
+        window.api.showError("Format not selected. Please upload the format of your statement from Add format if not already done.");
         return
     }
 
@@ -159,10 +191,11 @@ async function uploadConfirm(){
 
     const result = await window.api.readExcel(filePath, selectedFormat.FromRowNo, toRow);
     
+    clearFilterofDataTable()
+
     populateData(result, selectedFormat)
 
 }
-
 
 async function populateData(data, selectedFormat){
 
@@ -456,7 +489,6 @@ async function remapData(obj, keyMap) {
         for (const [key, value] of Object.entries(keyMap)) {
             if (allowedKeys.includes(key)){
                 if (Object.hasOwn(element, value)){
-                    debugger
 
                     if (key == "Debit" || key == "Credit"){
                         tempElement[key] = isNaN(Number(element[value])) ? 0 : Number(element[value])
@@ -522,6 +554,8 @@ async function filterDataTable(){
         let fromAmt = document.querySelector("#fromAmtRange").value
         let toAmt = document.querySelector("#toAmtRange").value
         let selectAmtFlterType = document.querySelector("#selectAmtFilter").value
+        let selectCategory = document.querySelector("#selectCategory").value
+        let selectTag = document.querySelector("#selectTag").value
 
         if (fromDateRange != ""){
             tableFilter.push({ field: "TranDate", type: ">=", value: fromDateRange })
@@ -535,11 +569,18 @@ async function filterDataTable(){
         if (toAmt != ""){
             tableFilter.push({ field: selectAmtFlterType, type: "<=", value: Number(toAmt) })
         }
+        if (selectCategory != "Select Category" && selectCategory != ""){
+            tableFilter.push({ field: "Category", type: "=", value: selectCategory })
+        }
+        if (selectTag != "Select Tag" && selectTag != ""){
+            tableFilter.push({ field: "SrcTag", type: "=", value: selectTag })
+        }
 
         table.setFilter(tableFilter);
     }
 
     recalculateLegends()
+    filterAllCharts(table)
 }
 
 async function clearFilterofDataTable(){
@@ -550,12 +591,14 @@ async function clearFilterofDataTable(){
     
     tableFilter = []
 
-    if (table != null){
-        table.clearFilter();
-        table.clearSort();
+    if (table == null){
+        return
     }
+    table.clearFilter();
+    table.clearSort();
+
     recalculateLegends()
-    console.log(await window.api.getTags()) //jojo
+    filterAllCharts(table)
 }
 
 async function calculateLegends(data) {
@@ -568,7 +611,7 @@ async function calculateLegends(data) {
     let totalMonths = 0
     let currDay = 0
     let totalDays = 0
-    debugger
+    
     data.forEach(element => {
         let parsingMonth = element.TranDate.split("-")[1]
         let parsingDay = element.TranDate.split("-")[2]
@@ -641,13 +684,13 @@ async function assignTag() {
     await window.api.setTags(availableTags);
 
     table.getRows().forEach(row => {
-    const data = row.getData();
+        const data = row.getData();
 
-    if (data.TranSource.trim() === assignedKey) {
-        row.update({
-            SrcTag: assignedValue
-        });
-    }
+        if (data.TranSource.trim() === assignedKey) {
+            row.update({
+                SrcTag: assignedValue
+            });
+        }
     });
 
 }
@@ -689,4 +732,28 @@ async function excludeRow(rowTranDetail){
     
     table.setFilter(tableFilter);
     recalculateLegends()
+    filterAllCharts(table)
+}
+
+async function displayCharts(source) {
+    const dataDiv = document.getElementById('data-table')
+    const chartDiv = document.getElementById('data-charts')
+
+    if (dataDiv.style.display != "none"){
+        debugger
+        source.innerHTML = 'Show Data<i class="fa-solid fa-table ms-2"></i>'
+        chartDiv.style = "display: block"
+        dataDiv.style = "display: none;"
+    }else{
+        source.innerHTML = 'Show Charts<i class="fa-solid fa-chart-line ms-2"></i>'
+        chartDiv.style = "display: none"
+        dataDiv.style = "display: block;"
+    }
+    
+    await displayAllCharts(table)
+
+}
+
+async function openAbout() {
+    window.api.openUrl("https://github.com/kingmajin/Croco-Analyst");
 }
