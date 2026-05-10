@@ -55,12 +55,12 @@ body{
 }
 
 #data-table {
-  width: 1300px;
-  height: 100%;
+    /* width: 1300px; */
+    height: 100%;
 }
 #data-charts{
-      width: 1300px;
-  height: 100%;
+    /* width: 1300px; */
+    height: 100%;
 }
 
 .format-container{

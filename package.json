@@ -1,6 +1,6 @@
 {
   "name": "croco-analyst-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -16,7 +16,7 @@
     },
     "win": {
       "target": "portable",
-      "icon": "assets/croco-analyst-ico.ico"
+      "icon": "assets/croco-analyst.ico"
     }
   },
   "keywords": [],

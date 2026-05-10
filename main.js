@@ -12,7 +12,10 @@ const createWindow = () => {
   const win = new BrowserWindow({
     width: 1600,
     height: 950,
-    resizable: false,
+    // resizable: false,
+    minWidth: 1600,
+    minHeight: 910,
+    icon: path.join(__dirname, "assets/croco-analyst.ico"),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
