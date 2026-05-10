@@ -60,27 +60,17 @@ Croco Analyst helps users import Excel bank statements, map transaction columns,
 
 ## Clone Repository
 
-```bash
-git clone <your-repository-url>
-```
-
----
-
 ## Install Dependencies
 
 ```bash
 npm install
 ```
 
----
-
 ## Run Application
 
 ```bash
 npm start
 ```
-
----
 
 ## Build Application
 
