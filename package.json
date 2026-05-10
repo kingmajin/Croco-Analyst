@@ -21,7 +21,7 @@
   },
   "keywords": [],
   "author": "Ashutosh Singh",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "electron": "^41.2.2",
