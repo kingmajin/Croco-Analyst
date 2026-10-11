@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-    
+
   selectFile: () => ipcRenderer.invoke('select-file'),
 
   readExcel: (filePath, fromRow, toRow) =>
@@ -17,6 +17,10 @@ contextBridge.exposeInMainWorld('api', {
 
   showError: (msg) => ipcRenderer.invoke('show-error', msg),
 
-  openUrl: (url) => ipcRenderer.invoke("open-url", url)
-  
+  confirm: (message, confirmLabel = "OK") => ipcRenderer.invoke('confirm', { message, confirmLabel }),
+
+  saveReportPdf: (fileName) => ipcRenderer.invoke('save-report-pdf', fileName),
+
+  openAbout: () => ipcRenderer.invoke("open-about")
+
 });

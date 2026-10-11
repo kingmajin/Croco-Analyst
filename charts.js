@@ -3,51 +3,47 @@ let monthWiseLineChart = null
 let categoryChart = null
 let weeklyChart = null
 
-async function displayAllCharts(table) {
+const FULL_MONTHS = {"01":"January","02":"February","03":"March","04":"April","05":"May","06":"June",
+	"07":"July","08":"August","09":"September","10":"October","11":"November","12":"December"}
 
-	if (document.querySelector("#data-charts").style.display == 'block'){
+const SHORT_MONTHS = {"01":"Jan","02":"Feb","03":"Mar","04":"Apr","05":"May","06":"Jun",
+	"07":"Jul","08":"Aug","09":"Sep","10":"Oct","11":"Nov","12":"Dec"}
 
-		// load all the charts here
-		loadDayWiseExpenseChart(table)
-		loadMonthWiseExpenseChart(table)
-		loadCategoryExpenseChart(table)
-		loadWeeklyExpenseChart(table)
+const CHART_GAP = 10
 
-	}
-}
+// Height of the "Exclude Uncategorized" checkbox under the category chart
+const CATEGORY_OPTION_HEIGHT = 24
 
-async function filterAllCharts(table) {
+const toPoints = (totals, label, amount) => totals.map(total => ({ x: label(total.key), y: Number(total[amount].toFixed(2)) }))
 
-	// filter all the charts here
-	loadDayWiseExpenseChart(table)
-	loadMonthWiseExpenseChart(table)
-	loadCategoryExpenseChart(table)
-	loadWeeklyExpenseChart(table)
+// rows must be sorted by date. Charts are only drawn while the chart view is visible
+// because they size themselves to their container.
+async function displayAllCharts(rows) {
 
-}
+	const chartDiv = document.querySelector("#data-charts")
 
-async function loadDayWiseExpenseChart(table) {  //This will create the chart for last month
-
-	if (table == null) {
-		return
-	}
-	
-	let months = {"01":"January","02":"February","03":"March","04":"April","05":"May","06":"June",
-		"07":"July","08":"August","09":"September","10":"October","11":"November","12":"December"}
-
-	const filteredData = table.getData("active");
-
-	if (filteredData.length < 1){ // check if no value in table
+	if (chartDiv.style.display != 'block' || rows == null || rows.length < 1){
 		return
 	}
 
-	const dateDelimiter = filteredData[0].TranDate[4]
-	const lastMonth = filteredData[filteredData.length-1].TranDate.split(dateDelimiter)[1]
-	const lastyear = filteredData[filteredData.length-1].TranDate.split(dateDelimiter)[0]
+	// Two rows of charts share the visible height, the category chart takes both
+	const rowHeight = Math.max(240, Math.floor((chartDiv.clientHeight - CHART_GAP * 3) / 2))
 
-	let fullmonth = months[lastMonth] +" "+ lastyear
+	loadDayWiseExpenseChart(rows, rowHeight)
+	loadMonthWiseExpenseChart(rows, rowHeight)
+	loadCategoryExpenseChart(rows, rowHeight * 2 + CHART_GAP - CATEGORY_OPTION_HEIGHT - 20)
+	loadWeeklyExpenseChart(rows, rowHeight)
+}
 
-	const rawData = await getMonthDailyExpense(table, filteredData, lastMonth, lastyear)
+async function loadDayWiseExpenseChart(rows, height) {  //This will create the chart for last month
+
+	const lastDate = rows[rows.length-1].TranDate
+	const lastMonth = lastDate.slice(5, 7)
+	const lastyear = lastDate.slice(0, 4)
+
+	let fullmonth = FULL_MONTHS[lastMonth] +" "+ lastyear
+
+	const totals = dailyTotals(rows, lastDate.slice(0, 7))
 
 	var options = {
 		title: {
@@ -56,23 +52,15 @@ async function loadDayWiseExpenseChart(table) {  //This will create the chart fo
         },
 		chart: {
 			type: 'line',
-			height: 270,
-			width: 900
+			height: height,
+			width: '100%'
 		},
 		series: [{
 			name: "Debit",
-			data: rawData,
-			parsing: {
-				x: 'date',
-				y: 'debitDayTotal'
-			}
+			data: toPoints(totals, day => day, "debit")
 		},{
 			name: "Credit",
-			data: rawData,
-			parsing: {
-				x: 'date',
-				y: 'creditDayTotal'
-			}
+			data: toPoints(totals, day => day, "credit")
 		}],
 		yaxis: {
 			title: {
@@ -118,23 +106,12 @@ async function loadDayWiseExpenseChart(table) {  //This will create the chart fo
 
 }
 
-async function loadMonthWiseExpenseChart(table) {  //This will create the chart for last year
+async function loadMonthWiseExpenseChart(rows, height) {  //This will create the chart for last year
 
-	if (table == null) {
-		return
-	}
+	const lastyear = rows[rows.length-1].TranDate.slice(0, 4)
 
-	const filteredData = table.getData("active");
+	const totals = monthlyTotals(rows, lastyear)
 
-	if (filteredData.length < 1){ // check if no value in table
-		return
-	}
-	const dateDelimiter = filteredData[0].TranDate[4]
-	const lastyear = filteredData[filteredData.length-1].TranDate.split(dateDelimiter)[0]
-
-	let fullYear = lastyear
-
-	const rawData = await getmonthlyExpense(table, filteredData, lastyear)
 	var options = {
 		title: {
           text: 'Cash Flow Trend for Year',
@@ -142,24 +119,16 @@ async function loadMonthWiseExpenseChart(table) {  //This will create the chart 
         },
 		chart: {
 			type: 'area',
-			height: 270,
-			width: 450
+			height: height,
+			width: '100%'
 		},
 		series: [{
 			name: "Debit",
-			data: rawData,
-			parsing: {
-				x: 'date',
-				y: 'debitMonthTotal'
-			}
+			data: toPoints(totals, month => SHORT_MONTHS[month], "debit")
 		},
 		{
 			name: "Credit",
-			data: rawData,
-			parsing: {
-				x: 'date',
-				y: 'creditMonthTotal'
-			}
+			data: toPoints(totals, month => SHORT_MONTHS[month], "credit")
 		}],
 		yaxis: {
 			title: {
@@ -172,7 +141,6 @@ async function loadMonthWiseExpenseChart(table) {  //This will create the chart 
 			}
         },
 		stroke :{
-			// width : 2,
 			curve: 'straight'
 		},
 		markers: {
@@ -187,7 +155,7 @@ async function loadMonthWiseExpenseChart(table) {  //This will create the chart 
 			offsetX: 0
 		},
 		subtitle: {
-			text: fullYear,
+			text: lastyear,
 			align: 'left',
 			style: {
 				fontSize:  '14px',
@@ -206,19 +174,13 @@ async function loadMonthWiseExpenseChart(table) {  //This will create the chart 
 
 }
 
-async function loadCategoryExpenseChart(table) {
-		
-	if (table == null) {
-		return
-	}
+async function loadCategoryExpenseChart(rows, height) {
 
-	const filteredData = table.getData("active");
+	// Uncategorized can be big enough to flatten every other bar, the checkbox under the chart drops it
+	const excludeUncategorized = document.querySelector("#excludeUncategorized").checked
+	const categories = [...Object.keys(categoryMap), ...(excludeUncategorized ? [] : [UNCATEGORIZED])]
 
-	if (filteredData.length < 1){ // check if no value in table
-		return
-	}
-
-	const rawData = await getCategoryExpense(table, filteredData)
+	const totals = categoryTotals(rows, categories)
 
 	var options = {
 		title: {
@@ -227,8 +189,8 @@ async function loadCategoryExpenseChart(table) {
         },
 		chart: {
 			type: 'bar',
-			height: 575,
-			width: 390
+			height: height,
+			width: '100%'
 		},
 		plotOptions: {
 			bar: {
@@ -242,11 +204,7 @@ async function loadCategoryExpenseChart(table) {
         },
 		series: [{
 			name: "Debit",
-			data: rawData,
-			parsing: {
-				x: 'category',
-				y: 'debitCatTotal'
-			}
+			data: toPoints(totals, category => category, "debit")
 		}],
 		yaxis: {
 			title: {
@@ -277,20 +235,10 @@ async function loadCategoryExpenseChart(table) {
 	categoryChart.render();
 }
 
-async function loadWeeklyExpenseChart(table) {
+async function loadWeeklyExpenseChart(rows, height) {
 
-	if (table == null) {
-		return
-	}
+	const totals = weekdayTotals(rows)
 
-	const filteredData = table.getData("active");
-
-	if (filteredData.length < 1){ // check if no value in table
-		return
-	}
-
-	const rawData = await getWeeklyExpense(table, filteredData)
-	debugger
 	var options = {
 		title: {
           text: 'Weekly Expense Chart',
@@ -298,8 +246,8 @@ async function loadWeeklyExpenseChart(table) {
         },
 		chart: {
 			type: 'bar',
-			height: 270,
-			width: 450
+			height: height,
+			width: '100%'
 		},
 		plotOptions: {
 			bar: {
@@ -313,11 +261,7 @@ async function loadWeeklyExpenseChart(table) {
         },
 		series: [{
 			name: "Debit",
-			data: rawData,
-			parsing: {
-				x: 'dayName',
-				y: 'debitTotal'
-			}
+			data: toPoints(totals, day => day, "debit")
 		}],
 		yaxis: {
 			title: {
@@ -339,181 +283,4 @@ async function loadWeeklyExpenseChart(table) {
 	weeklyChart = new ApexCharts(document.querySelector("#weeklyChart"), options);
 
 	weeklyChart.render();
-}
-
-async function getMonthDailyExpense(table, filteredData, month, year) {
-
-	if (table == null) {
-		return
-	}
-
-	let dateDelimiter = filteredData[0].TranDate[4]
-	let selectedMonthData = []
-
-	filteredData.forEach(element => {
-		if (element.TranDate.split(dateDelimiter)[1] == month && element.TranDate.split(dateDelimiter)[0] == year){
-			selectedMonthData.push(element)
-		}
-	});
-
-	let chartDataList = []
-
-	let prevDay = ""
-	let debitDayTotal = 0
-	let creditDayTotal = 0
-
-	for (let i=0 ; i<selectedMonthData.length; i++){
-		let chartData
-
-		if (selectedMonthData[i].TranDate.split(dateDelimiter)[2] == prevDay){
-			
-			debitDayTotal += Number(selectedMonthData[i].Debit)
-			creditDayTotal += Number(selectedMonthData[i].Credit)
-			
-		}else{
-			if(prevDay != "" && i != selectedMonthData.length-1){
-				chartData = {
-					date : prevDay,
-					debitDayTotal : debitDayTotal.toFixed(2),
-					creditDayTotal : creditDayTotal.toFixed(2)
-				}
-				chartDataList.push(chartData)
-			}
-			
-			debitDayTotal = Number(selectedMonthData[i].Debit)
-			creditDayTotal = Number(selectedMonthData[i].Credit)
-			prevDay = selectedMonthData[i].TranDate.split(dateDelimiter)[2]
-		}
-
-
-		if (i == selectedMonthData.length-1){
-			chartData = {
-				date : prevDay,
-				debitDayTotal : debitDayTotal.toFixed(2),
-				creditDayTotal : creditDayTotal.toFixed(2)
-			}
-			chartDataList.push(chartData)
-		}
-	}
-
-	return chartDataList
-}
-
-async function getmonthlyExpense(table, filteredData, year) {
-	
-	if (table == null) {
-		return
-	}
-
-	let dateDelimiter = filteredData[0].TranDate[4]
-	let selectedYearData = []
-
-	filteredData.forEach(element => {
-		if (element.TranDate.split(dateDelimiter)[0] == year){
-			selectedYearData.push(element)
-		}
-	});
-
-	let chartDataList = []
-
-	let months = {"01":"Jan","02":"Feb","03":"Mar","04":"Apr","05":"May","06":"Jun",
-		"07":"Jul","08":"Aug","09":"Sep","10":"Oct","11":"Nov","12":"Dec"}
-
-	let prevMonth = ""
-	let debitMonthTotal = 0
-	let creditMonthTotal = 0
-
-	for (let i=0 ; i<selectedYearData.length; i++){
-		let chartData
-
-		if (selectedYearData[i].TranDate.split(dateDelimiter)[1] == prevMonth){
-			
-			debitMonthTotal += Number(selectedYearData[i].Debit)
-			creditMonthTotal += Number(selectedYearData[i].Credit)
-			
-		}else{
-			if(prevMonth != "" && i != selectedYearData.length-1){
-				chartData = {
-					date : months[prevMonth],
-					debitMonthTotal : debitMonthTotal.toFixed(2),
-					creditMonthTotal : creditMonthTotal.toFixed(2)
-				}
-				chartDataList.push(chartData)
-			}
-			
-			debitMonthTotal = Number(selectedYearData[i].Debit)
-			creditMonthTotal = Number(selectedYearData[i].Credit)
-			prevMonth = selectedYearData[i].TranDate.split(dateDelimiter)[1]
-		}
-
-		if (i == selectedYearData.length-1){
-			chartData = {
-				date : months[prevMonth],
-				debitMonthTotal : debitMonthTotal.toFixed(2),
-				creditMonthTotal : creditMonthTotal.toFixed(2)
-			}
-			chartDataList.push(chartData)
-		}
-	}
-
-	return chartDataList
-}
-
-async function getCategoryExpense(table, filteredData) {
-	if (table == null) {
-		return
-	}
-
-	let chartDataList  = []
-
-	let categoryList = Object.keys(categoryMap);
-
-	for (let i=0 ; i<categoryList.length ; i++){
-
-		let tempDebitTotal = 0
-		let tempCreditTotal = 0
-		for (let j=0 ; j<filteredData.length ; j++){
-			if (categoryList[i] == filteredData[j].Category){
-				tempDebitTotal += filteredData[j].Debit
-				tempCreditTotal += filteredData[j].Credit
-			}
-		}
-
-		let chartData = {
-			category : categoryList[i],
-			debitCatTotal : tempDebitTotal.toFixed(1),
-			creditCatTotal : tempCreditTotal.toFixed(1)
-		}
-		chartDataList.push(chartData)
-	}
-
-	return chartDataList
-}
-
-async function getWeeklyExpense(table, filteredData) {
-	if (table == null) {
-		return
-	}
-
-	let chartDataList  = []
-	 debugger
-	const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-	for (let i=0 ; i<7 ; i++){ // iterating through weeks
-		let tempTotalDebit = 0
-		for (let j=0 ; j<filteredData.length ; j++){
-			const dayName = days[new Date(filteredData[j].TranDate).getDay()];
-
-			if(days[i] == dayName){
-				tempTotalDebit += filteredData[j].Debit
-			}
-		}
-		let chartData = {
-			dayName : days[i],
-			debitTotal : tempTotalDebit.toFixed(1)
-		}
-		chartDataList.push(chartData)
-	}
-
-	return chartDataList
 }

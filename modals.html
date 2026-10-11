@@ -15,7 +15,74 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-info" data-bs-dismiss="modal" onclick="assignTag()">Okay</button>
+        <button type="button" class="btn btn-info" data-bs-dismiss="modal" data-action="assignTag">Okay</button>
+    </div>
+    </div>
+</div>
+</div>
+
+<!-- Modal with the guide for adding a format -->
+<div class="modal fade" id="formatGuideModal" tabindex="-1" aria-labelledby="formatGuideModalTitle" aria-hidden="true">
+<div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="formatGuideModalTitle">Guide for adding a format</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body format-guide">
+        <img src="./assets/add-format-guide.jpg" class="img-fluid border rounded mb-3" alt="Example bank statement showing which rows and columns go into each field of the format">
+
+        <p>A format tells Croco Analyst where the transactions are in your bank's statement. You only add it once per bank, then pick it on the Dashboard every time you load a statement from that bank. Open one of your statements in Excel next to this guide while you fill it in.</p>
+
+        <h6>1. Title</h6>
+        <p>Any name that helps you recognise the format, for example <code>SBI Savings</code>. Every format needs a different title.</p>
+
+        <h6>2. From Row</h6>
+        <p>The row number of the <strong>header row</strong>, the row that holds the column names. Rows above it (bank name, address, account details) are ignored. In the example the header <code>SRL NO, Tran Date, CHQNO ...</code> is on row <strong>4</strong>, so From Row is <code>4</code>.</p>
+
+        <h6>3. To Row or Till the end</h6>
+        <p>The row number of the last transaction. Most statements have a different number of rows every month, so it is easier to tick <strong>Till the end</strong>: transactions are then read until the first empty row, and anything after it (totals, disclaimers) is left out.</p>
+
+        <h6>4. Map Columns</h6>
+        <p>Type each column name <strong>exactly as it is written in the header row</strong>. Capital letters matter, extra spaces at the start or end don't. Leave a field empty if your statement doesn't have that column.</p>
+        <table class="table table-sm table-bordered w-auto">
+            <thead class="table-light">
+                <tr><th>Field</th><th>In the example</th><th>Needed?</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Tran. Date</td><td><code>Tran Date</code></td><td>Yes</td></tr>
+                <tr><td>Cheque No.</td><td><code>CHQNO</code></td><td>Optional</td></tr>
+                <tr><td>Details</td><td><code>PARTICULARS</code></td><td>Needed for categories and splitting</td></tr>
+                <tr><td>Debit</td><td><code>DR</code></td><td rowspan="2">At least one of the two</td></tr>
+                <tr><td>Credit</td><td><code>CR</code></td></tr>
+                <tr><td>Balance</td><td><code>BAL</code></td><td>Optional, used for Current Balance</td></tr>
+            </tbody>
+        </table>
+
+        <h6>5. Split transaction details (optional, recommended)</h6>
+        <p>Banks usually pack several things into the details column. Splitting it gives you a separate transaction number and <strong>transaction source</strong> (who you paid or who paid you). The source is what tags and categories work on, so this is where the tool gets most useful.</p>
+        <p>Take <code>UPI/P2M/1234567896/Random CAB</code> from the example. Cutting it at every <code>/</code> gives these parts, counted from 1:</p>
+        <table class="table table-sm table-bordered w-auto">
+            <tbody>
+                <tr><th class="table-light">Part</th><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                <tr><th class="table-light">Text</th><td>UPI</td><td>P2M</td><td>1234567896</td><td>Random CAB</td></tr>
+            </tbody>
+        </table>
+        <ul>
+            <li><strong>Separator</strong>: the character between the parts, here <code>/</code>. Some banks use <code>-</code> or <code>:</code> instead.</li>
+            <li><strong>Tran. No. Index</strong>: the part that holds the transaction number, here <code>3</code>.</li>
+            <li><strong>Tran. Src. Index</strong>: the part that holds the source, here <code>4</code>.</li>
+        </ul>
+
+        <h6>Good to know</h6>
+        <ul class="mb-0">
+            <li>Dates are read day first, e.g. <code>22-04-2024</code>, <code>22/04/24</code> or <code>22 Apr 2024</code>. Rows without a readable date (wrapped text, totals) are skipped and the Dashboard tells you how many.</li>
+            <li>Amounts can contain commas or currency text such as <code>1,234.50</code> or <code>Rs. 500</code>.</li>
+            <li>If a column name doesn't match, the Dashboard shows which ones are missing and lists the names it found, so you can correct the format with the edit button.</li>
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-info" data-bs-dismiss="modal">Got it</button>
     </div>
     </div>
 </div>
@@ -30,7 +97,7 @@
     </div>
     <div id="myRedToast" class="toast align-items-center text-bg-danger border-0 p-3" role="alert">
         <div class="toast-body">
-            <h5>Unsuccessfull Attempt</h5>
+            <h5>Unsuccessful Attempt</h5>
         </div>
     </div>
 </div>

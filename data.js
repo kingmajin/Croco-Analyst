@@ -23,7 +23,7 @@ const categoryMap = {
         "food", "restaurant", "cafe", "coffee", "dining",
         "pasta", "pizza", "burger", "meal", "tiffin",
         "eatery", "bakery", "snacks", "juice", "biryani",
-        "roll", "thali", "breakfast", "lunch", "dinner", "roll",
+        "roll", "thali", "breakfast", "lunch", "dinner",
         "momo", "chaat", "chai", "tea", "tapri",
         "takeaway", "parcel", "dinein", "quick bite", "fastfood",
         "combo", "platter", "buffet", "dessert", "icecream",
@@ -33,9 +33,9 @@ const categoryMap = {
     ],
 
     Transportation: [
-        "uber", "ola", "rapido", "redbus", "trctc",
+        "uber", "ola", "rapido", "redbus", "irctc",
         "delhi metro", "bmtc", "best", "ksrtc", "lmrc", "upmrc",
-        "upsrtc", "rssrtc",
+        "upsrtc", "rsrtc",
         "cab", "taxi", "auto", "ride", "trip",
         "bus", "train", "metro", "transport",
         "ticket", "travel pass", "travel",
@@ -63,8 +63,7 @@ const categoryMap = {
         "checkout", "order id", "invoice", "retail", "mall",
         "showroom", "outlet", "brand store", "online order",
         "cart payment", "wishlist", "fashion store",
-        "gadgets", "mobile", "laptop", "accessory",
-
+        "gadgets", "accessory"
     ],
 
     Bills: [
@@ -85,7 +84,8 @@ const categoryMap = {
         "inox", "movie", "cinema", "subscription",
         "streaming", "ticket", "show", "music",
         "concert", "event", "theatre", "festival",
-        "ott", "subscription", "episode",
+        "ott", "episode", "google play", "play store",
+        "playstore", "app store", "itunes", "youtube premium",
         "cinema hall", "multiplex", "screening",
         "gaming", "in-game", "arcade", "ticket booking",
         "live show", "festival pass"
@@ -143,7 +143,7 @@ const categoryMap = {
         "neft", "rtgs", "imps", "upi id",
         "wallet load", "cashback", "reward",
         "settlement", "merchant payment", "gateway",
-        "processing fee", "interest charge"
+        "processing fee", "interest charge", "insurance"
     ],
 
     PersonalCare: [
@@ -168,7 +168,7 @@ const categoryMap = {
     Pets: [
         "pet", "dog", "cat", "pet food", "vet",
         "pet grooming", "dog food", "cat food",
-        "pet clinic", "vet", "pet care",
+        "pet clinic", "pet care",
         "pet supplies", "litter", "pet toys"
     ],
 
@@ -176,4 +176,9 @@ const categoryMap = {
         "services", "traders", "enterprise", "enterprises",
         "agency", "solutions"
     ]
+}
+
+// Lets the tests load the keyword list
+if (typeof module === "object" && module.exports) {
+    module.exports = categoryMap
 }

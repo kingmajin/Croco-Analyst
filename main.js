@@ -1,20 +1,24 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, screen } = require('electron')
 const { ipcMain, dialog, shell } = require('electron');
 
 const Store = require('electron-store').default;
 
 const path = require('path');
-const XLSX = require('xlsx');
+const fs = require('fs');
+const { readStatement } = require('./statement-reader');
 
 const store = new Store();
 
+const ABOUT_URL = "https://github.com/kingmajin/Croco-Analyst";
+
 const createWindow = () => {
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+
   const win = new BrowserWindow({
-    width: 1600,
-    height: 950,
-    // resizable: false,
-    minWidth: 1600,
-    minHeight: 910,
+    width: Math.min(1600, screenWidth),
+    height: Math.min(950, screenHeight),
+    minWidth: 1280,
+    minHeight: 720,
     icon: path.join(__dirname, "assets/croco-analyst.ico"),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -22,6 +26,10 @@ const createWindow = () => {
       nodeIntegration: false
     }
   })
+
+  // The app is a single local page, never open or navigate to anything else
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  win.webContents.on('will-navigate', (event) => event.preventDefault());
 
   win.loadFile('index.html')
 }
@@ -43,8 +51,8 @@ app.on('window-all-closed', () => {
 });
 
 // Select file
-ipcMain.handle('select-file', async () => {
-  const result = await dialog.showOpenDialog({
+ipcMain.handle('select-file', async (event) => {
+  const result = await dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), {
     properties: ['openFile'],
     filters: [{ name: 'Excel Files', extensions: ['xls', 'xlsx'] }]
   });
@@ -54,43 +62,9 @@ ipcMain.handle('select-file', async () => {
   return result.filePaths[0]; // ✅ always valid path
 });
 
-// Read excel file and return the object
+// Read excel file and return { headers, records } or { error }
 ipcMain.handle('read-excel', async (event, { filePath, fromRow, toRow }) => {
-
-    const workbook = XLSX.readFile(filePath);
-
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
-    // Convert sheet to JSON (array of arrays)
-    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-    let endRow = fromRow - 1
-    if( toRow == -1){
-      for (let i= fromRow-1; i<data.length; i++){
-        let cell = data[i];
-        if (!cell || String(cell).trim() === "") break;
-        endRow ++
-      }
-      toRow = endRow
-    }
-
-    // Slice based on row range
-    const slicedData = data.slice(fromRow - 1, toRow);
-
-    // Convert to object format 
-    const headers = slicedData[0];
-    const rows = slicedData.slice(1);
-
-    const result = rows.map(row => {
-      let obj = {};
-      headers.forEach((key, index) => {
-          obj[key] = row[index];
-      });
-      return obj;
-    });
-
-    return result;
+  return readStatement(filePath, fromRow, toRow);
 });
 
 ipcMain.handle('save-mappings', (event, data) => {
@@ -98,11 +72,23 @@ ipcMain.handle('save-mappings', (event, data) => {
 });
 
 ipcMain.handle('get-mappings', () => {
-    return store.get('mappings');
+    return store.get('mappings', []);
 });
 
 ipcMain.handle('show-error', async (event, message) => {
   dialog.showErrorBox('Validation Error', message);
+});
+
+// Ask a yes/no question, resolves to true when the user confirms
+ipcMain.handle('confirm', async (event, { message, confirmLabel }) => {
+  const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(event.sender), {
+    type: 'warning',
+    buttons: ['Cancel', confirmLabel],
+    defaultId: 0,
+    cancelId: 0,
+    message
+  });
+  return response === 1;
 });
 
 ipcMain.handle('set-tags', (event, data) => {
@@ -110,9 +96,29 @@ ipcMain.handle('set-tags', (event, data) => {
 });
 
 ipcMain.handle('get-tags', () => {
-    return store.get('tags');
+    return store.get('tags', {});
 });
 
-ipcMain.handle("open-url", async (event, url) => {
-  await shell.openExternal(url);
+// Save the page as it prints (the report's print styles) to a PDF the user picks
+ipcMain.handle('save-report-pdf', async (event, fileName) => {
+  const safeName = path.basename(String(fileName)).replace(/[<>:"\/\\|?*]/g, "_");
+
+  const { canceled, filePath } = await dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), {
+    defaultPath: path.join(app.getPath('documents'), safeName),
+    filters: [{ name: 'PDF', extensions: ['pdf'] }]
+  });
+
+  if (canceled || !filePath) return { saved: false };
+
+  try {
+    const pdf = await event.sender.printToPDF({ printBackground: true, pageSize: 'A4' });
+    await fs.promises.writeFile(filePath, pdf);
+    return { saved: true };
+  } catch (err) {
+    return { error: err.message };
+  }
+});
+
+ipcMain.handle("open-about", async () => {
+  await shell.openExternal(ABOUT_URL);
 });
