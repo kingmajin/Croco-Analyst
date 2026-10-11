@@ -25,7 +25,17 @@ body{
       color: white;
       left: 0;
       top: 0;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 10px;
     }
+
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
 .sidebar p {
     display: flex;
@@ -52,15 +62,71 @@ body{
     margin-left: 220px;
     height: 100vh;
     background-color: #F6F8FB;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* The table / charts card takes whatever height is left */
+.data-card{
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+.filter-bar{
+    row-gap: 6px;
+}
+.data-area{
+    flex: 1;
+    min-height: 0;
+    margin-top: 6px;
 }
 
 #data-table {
-    /* width: 1300px; */
     height: 100%;
 }
 #data-charts{
-    /* width: 1300px; */
     height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.chart-grid{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 0.8fr);
+    gap: 10px;
+}
+.chart-grid > div{
+    min-width: 0;
+}
+#dailyExpenseLineChart{
+    grid-column: 1 / 3;
+}
+.category-chart-cell{
+    grid-column: 3;
+    grid-row: 1 / 3;
+}
+.category-chart-option{
+    height: 24px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.legend-bar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+.legend-card{
+    flex: 1;
+    min-width: 0;
+}
+.legend-card .card-text{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .format-container{
@@ -118,4 +184,205 @@ body{
     /* background-color: #c9e5c5; */
     font-weight: 500;
     color: green;
+}
+
+.format-guide h6{
+    margin-top: 1.25rem;
+    font-weight: 600;
+}
+.format-guide code{
+    color: #158C45;
+}
+
+/* ----- Report ----- */
+.report-container{
+    width: 100%;
+    margin-left: 220px;
+    height: 100vh;
+    background-color: #F6F8FB;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.report-filter-bar{
+    margin: 0.5rem 5px;
+    padding: 10px 25px;
+    row-gap: 6px;
+}
+.report-presets .btn.active{
+    background-color: #158C45;
+    border-color: #158C45;
+    color: white;
+}
+.report-body{
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 5px 10px;
+}
+.report-period{
+    margin: 4px 20px 0;
+    color: #495057;
+    font-weight: 500;
+}
+.report-group-title{
+    margin: 16px 20px 8px;
+    color: grey;
+}
+.report-grid{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+}
+.report-wide{
+    grid-column: 1 / -1;
+}
+.report-card{
+    padding: 14px 20px;
+    min-width: 0;
+}
+.report-card h6{
+    font-weight: 600;
+}
+.report-hint{
+    font-size: 13px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+.report-empty{
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+}
+.report-total{
+    font-size: 14px;
+    margin: 8px 0 0;
+}
+.report-table{
+    font-size: 14px;
+    margin-bottom: 0;
+}
+.report-table th{
+    font-weight: 600;
+    color: #495057;
+    white-space: nowrap;
+}
+.report-table .amount{
+    text-align: right;
+    white-space: nowrap;
+}
+/* Keeps a left aligned column from running into the right aligned number before it */
+.report-table .amount + :not(.amount){
+    padding-left: 24px;
+}
+/* Long details are cut short, the full text is in the tooltip */
+.report-detail{
+    display: inline-block;
+    max-width: max(140px, calc(50vw - 470px));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+.report-wide .report-detail{
+    max-width: max(240px, calc(100vw - 900px));
+}
+.report-stats{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.report-stat{
+    background-color: #F6F8FB;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+.report-stat p{
+    margin: 0;
+    font-size: 13px;
+    color: #6c757d;
+}
+.report-stat h5{
+    margin: 2px 0;
+}
+.report-partial{
+    font-size: 12px;
+    padding: 1px 6px;
+    margin-left: 4px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+/* Share of spending as a small bar next to the percentage */
+.report-share{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+.report-share-bar{
+    width: 90px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+.report-share-bar span{
+    display: block;
+    height: 100%;
+    background-color: #158C45;
+}
+.report-checks{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+}
+.report-checks li{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.report-checks li > div{
+    flex: 1;
+    min-width: 0;
+}
+
+/* Save as PDF prints the window, only the report goes on paper */
+@media print{
+    body{
+        overflow: visible;
+        background-color: white;
+    }
+    .sidebar, .main-container, .format-container, #modal-container,
+    .report-filter-bar, .report-actions, .report-header{
+        display: none !important;
+    }
+    .report-container{
+        margin-left: 0;
+        height: auto;
+        display: block !important;
+        background-color: white;
+    }
+    .report-body{
+        overflow: visible;
+        padding: 0;
+    }
+    .report-grid{
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .report-card{
+        break-inside: avoid;
+    }
+    .report-group-title, .report-period{
+        break-after: avoid;
+    }
+    .report-detail, .report-wide .report-detail{
+        max-width: none;
+        white-space: normal;
+    }
+    .report-print-title{
+        margin: 0 20px 4px;
+    }
 }

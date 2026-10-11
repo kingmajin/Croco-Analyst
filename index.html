@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 
     <!-- Bootstrap -->
     <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,7 +13,7 @@
 
     <!-- Tabulator -->
     <link href="./node_modules/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+    <link href="./node_modules/tabulator-tables/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="./mystyle.css">
 
@@ -26,15 +27,15 @@
         <div class="sidebar">
             <div class="logo" style="margin: 10px; text-align: center;"><img src="./assets/croco-analyst-logo.png" alt="logo" style="width: 80px; text-align: center;"></div>
 
-            <div style="display: flex; flex-direction: column; height: 88%; justify-content: space-between;">
+            <div class="sidebar-nav">
                 <div id="pageNavigation">
-                    <p class="active" onclick="switchPage(this)"><i class="fa-solid fa-house me-2"></i>Dashboard</p>
-                    <p onclick="switchPage(this)"><i class="fa-solid fa-signs-post me-2"></i>Format</p>
-                    <!-- <p onclick="switchPage(this)"><i class="fa-solid fa-newspaper me-2"></i>Generate Report</p> -->
+                    <p class="active" data-action="switchPage" data-page="dashboard"><i class="fa-solid fa-house me-2"></i>Dashboard</p>
+                    <p data-action="switchPage" data-page="format"><i class="fa-solid fa-signs-post me-2"></i>Format</p>
+                    <p data-action="switchPage" data-page="report"><i class="fa-solid fa-newspaper me-2"></i>Report</p>
                 </div>
                 <div>
                     <!-- <p href="#"><i class="fa-solid fa-gear me-2"></i>Settings</p> -->
-                    <p onclick="openAbout()"><i class="fa-solid fa-circle-info me-2"></i></i>About</p>
+                    <p data-action="openAbout"><i class="fa-solid fa-circle-info me-2"></i>About</p>
                 </div>
             </div>
         </div>
@@ -52,8 +53,8 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                         <a style="cursor: pointer;" class="dropdown-item" data-bs-toggle="modal" data-target="#uploadTagModal"><i class="fa fa-upload" aria-hidden="true" style="margin-right: 10px;"></i>Upload Tag Data</a>
-                        <a style="cursor: pointer;" class="dropdown-item" onclick="ExportTagData()"><i class="fa fa-download" aria-hidden="true" style="margin-right: 10px;"></i>Download Tag Data</a>
-                        <a style="cursor: pointer;" class="dropdown-item" onclick="clearAllTag()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete all Tags</a>
+                        <a style="cursor: pointer;" class="dropdown-item" data-action="ExportTagData"><i class="fa fa-download" aria-hidden="true" style="margin-right: 10px;"></i>Download Tag Data</a>
+                        <a style="cursor: pointer;" class="dropdown-item" data-action="clearAllTag"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Delete all Tags</a>
                     </div>
                 </div> -->
             </div>
@@ -65,21 +66,21 @@
                 <div class="card d-flex flex-row align-items-center" style="width: 30%; background-color: #F6F8FB; margin: 2px 25px;">
                     <i class="fa-regular fa-file-lines fs-3" style="color: #158C45; margin: 8px 10px;"></i>
                     <p id="selectedFileName" style="margin: 0; width: 58%;">No file selected</p>
-                    <button id="fileUpload" class="btn btn-dark btn-sm w-25" style="background-color: #081A36;" onclick="selectFile()">Select File</button>
+                    <button id="fileUpload" class="btn btn-dark btn-sm text-nowrap px-3 me-2" style="background-color: #081A36;" data-action="selectFile">Select File</button>
                 </div>
                 <select id="selectFormatCB" class="form-select form-select-sm" style="margin-left: 30px; width: 15%;">
                     <option selected>Select Format</option>
                 </select>
                 <div style="width: 30%;"></div>
-                <button id="uploadConfirm" type="button" class="btn btn-success" style="width: 15%;" onclick="uploadConfirm()">Start<i class="fa-solid fa-person-running ms-2"></i></button>
+                <button id="uploadConfirm" type="button" class="btn btn-success" style="width: 15%;" data-action="uploadConfirm">Start<i class="fa-solid fa-person-running ms-2"></i></button>
 
             </div>
 
             <!-- This is table, filter and charts container -->
-            <div class="card" style="margin: 0.5rem 5px; padding: 10px 25px; height: 75%;">
+            <div class="card data-card" style="margin: 0.5rem 5px; padding: 10px 25px;">
 
                 <!-- this is filters container-->
-                <div class="d-flex flex-row align-items-center">
+                <div class="d-flex flex-row flex-wrap align-items-center filter-bar">
                     <div style="margin: 0 3px 0 10px;">
                         <h5 style="margin: 0; font-size: 14px;">Date From</h5>
                         <input type="date" class="form-control form-control-sm" style="width: 120px;" id="fromDateRange">
@@ -113,30 +114,30 @@
                         </select>
                     </div>
 
-                    <button class="btn btn-success btn-sm" id="filterDateRange" style="margin-left: 30px; margin-top: 17px;" onclick="filterDataTable()">Apply Filter</button>
-                    <button class="btn btn-secondary ms-1 btn-sm" id="refreshTable" style="margin-top: 17px;" onclick="clearFilterofDataTable()">Reset</button>
+                    <button class="btn btn-success btn-sm" id="filterDateRange" style="margin-left: 30px; margin-top: 17px;" data-action="filterDataTable">Apply Filter</button>
+                    <button class="btn btn-secondary ms-1 btn-sm" id="refreshTable" style="margin-top: 17px;" data-action="clearFilterofDataTable">Reset</button>
 
-                    <button class="btn btn-warning btn-sm" id="displayCharts" style="margin-left: 30px; width: 140px; margin-top: 17px;" onclick="displayCharts(this)">Show Charts<i class="fa-solid fa-chart-line ms-2"></i></button>
+                    <button class="btn btn-warning btn-sm" id="displayCharts" style="margin-left: 30px; width: 140px; margin-top: 17px;" data-action="displayCharts">Show Charts<i class="fa-solid fa-chart-line ms-2"></i></button>
                     
                 </div>
 
-                <div style="margin: 0; height: 91%;">
+                <div class="data-area">
                     <!-- This is the data table container -->
-                    <div class="ui selectable green table" id="data-table"></div>
+                    <div class="ui selectable green table m-0" id="data-table"></div>
 
                     <!-- This is chart container -->
                     <div id="data-charts" style="display: none;">
-                        <div style="display: flex; flex-direction: row;">
-                            <div style="display: flex; flex-direction: column; width: 100%;">
-                                <div id="dailyExpenseLineChart" style="margin-top: 12px;"></div>
-                                <div style="display: flex; flex-direction: row; justify-content: space-between; margin-top: 5px;">
-                                    <div id="monthlyExpenseLineChart"></div>
-                                    <div id="weeklyChart" style="margin-right: 20px;"></div>
+                        <div class="chart-grid">
+                            <div id="dailyExpenseLineChart"></div>
+                            <div class="category-chart-cell">
+                                <div id="categoryChart"></div>
+                                <div class="form-check category-chart-option d-flex justify-content-center">
+                                    <input class="form-check-input me-2" type="checkbox" id="excludeUncategorized">
+                                    <label class="form-check-label" for="excludeUncategorized">Exclude Uncategorized</label>
                                 </div>
                             </div>
-                            <div>
-                                <div id="categoryChart" style="margin-top: 12px;"></div>
-                            </div>
+                            <div id="monthlyExpenseLineChart"></div>
+                            <div id="weeklyChart"></div>
                         </div>
                     </div>
                 </div>
@@ -144,36 +145,36 @@
             </div>
 
             <!-- This is display legends container -->
-            <div class="card" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 10px 25px; margin: 0.5rem 5px;"> 
-                <div class="card" style="width: 250px; padding: 8px 12px;">
+            <div class="card legend-bar" style="padding: 10px 25px; margin: 0.5rem 5px;">
+                <div class="card legend-card" style="padding: 8px 12px;">
                     <div class="card-body p-0">
                         <p class="card-text mb-0" Style="color: green; font-weight: 500;">Current Balance</p>
                         <h5 id="balanceAmount">0</h5>
                     </div>
                 </div>
 
-                <div class="card" style="width: 250px; padding: 8px 12px;">
+                <div class="card legend-card" style="padding: 8px 12px;">
                     <div class="card-body p-0">
                         <p class="card-text mb-0" Style="color: green; font-weight: 500;">Total Credited</p>
                         <h5 id="totalCredited">0</h5>
                     </div>
                 </div>
 
-                <div class="card" style="width: 250px; padding: 8px 12px;">
+                <div class="card legend-card" style="padding: 8px 12px;">
                     <div class="card-body p-0">
                         <p class="card-text mb-0" Style="color: red; font-weight: 500;">Total Expense</p>
                         <h5 id="expenseAmount">0</h5>
                     </div>
                 </div>
 
-                <div class="card" style="width: 250px; padding: 8px 12px;">
+                <div class="card legend-card" style="padding: 8px 12px;">
                     <div class="card-body p-0">
                         <p class="card-text mb-0" Style="color: rgb(0, 23, 128); font-weight: 500;">Average daily expense</p>
                         <h5 id="avgDailyExp">0</h5>
                     </div>
                 </div>
 
-                <div class="card" style="width: 250px; padding: 8px 12px;">
+                <div class="card legend-card" style="padding: 8px 12px;">
                     <div class="card-body p-0">
                         <p class="card-text mb-0" style="color: rgb(0, 23, 128); font-weight: 500;">Average monthly expense</p>
                         <h5 id="avgMonthlyExp">0</h5>
@@ -188,9 +189,12 @@
             <hr style="border-color: #9b9b9b; margin: 0.5rem 0;">
 
             <div class="d-flex flex-row" style="height: 93%;">
-                <div class="card w-50" style="margin: 0.5rem 5px; padding: 20px;">
+                <div class="card w-50" style="margin: 0.5rem 5px; padding: 20px; overflow-y: auto; overflow-x: hidden;">
 
-                    <h5>Add a Format</h5>
+                    <div class="d-flex flex-row align-items-center justify-content-between">
+                        <h5 id="formatFormTitle" class="mb-0">Add a Format</h5>
+                        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#formatGuideModal"><i class="fa-solid fa-circle-question me-2"></i>Guide for adding a format</button>
+                    </div>
                     <div class="mb-1 row mt-3">
                         <label for="formatTitle" class="col-sm-2 col-form-label form-label-sm">Title</label>
                         <div class="col-sm-10">
@@ -249,7 +253,7 @@
                             <div id="splitTranDiv" style="overflow: hidden; height: 0px; transition: 0.3s; opacity: 0;">
 
                                 <div class="row mt-2">
-                                    <label for="inputSeperator" class="col-sm-3 col-form-label form-label-sm">Sepetator</label>
+                                    <label for="inputSeperator" class="col-sm-3 col-form-label form-label-sm">Separator</label>
                                     <div class="col-sm-2">
                                         <input type="text" class="form-control form-control-sm" id="inputSeperator">
                                     </div>
@@ -292,9 +296,13 @@
                         </div>
                     </div>
                     <div style="height: 100%;"></div>
-                    <div style="display: flex; flex-direction: row;">
-                        <button type="button" class="btn btn-primary w-25 me-3" onclick="addFormat()">Add</button>
-                        <button type="button" class="btn btn-secondary" onclick="clearAddFormatForm()">Clear</button>
+                    <div id="addFormatButtons" style="display: flex; flex-direction: row;">
+                        <button type="button" class="btn btn-primary w-25 me-3" data-action="addFormat">Add</button>
+                        <button type="button" class="btn btn-secondary" data-action="clearAddFormatForm">Clear</button>
+                    </div>
+                    <div id="editFormatButtons" class="d-none" style="display: flex; flex-direction: row;">
+                        <button type="button" class="btn btn-primary w-25 me-3" data-action="updateFormat">Update</button>
+                        <button type="button" class="btn btn-secondary" data-action="cancelEditFormat">Cancel</button>
                     </div>
         
                 </div>
@@ -304,7 +312,150 @@
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <div class="ui selectable red table mt-3" id="view-format-table"></div>
-                    <button type="button" class="btn btn-danger w-25" onclick="clearFormats()"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Clear All</button>
+                    <!-- <button type="button" class="btn btn-danger w-25" data-action="clearFormats"><i class="fa fa-trash" aria-hidden="true" style="margin-right: 10px;"></i>Clear All</button> -->
+                </div>
+            </div>
+        </div>
+
+        <div class="report-container" style="display: none;">
+
+            <div class="header-container report-header">
+                <h5>Report</h5>
+                <button type="button" class="btn btn-dark btn-sm px-3 report-actions" style="background-color: #081A36;" data-action="saveReportPdf"><i class="fa-solid fa-file-pdf me-2"></i>Save as PDF</button>
+            </div>
+            <hr class="report-header" style="border-color: #9b9b9b; margin: 0.5rem 0;">
+
+            <!-- Report date range, separate from the dashboard filters -->
+            <div class="card d-flex flex-row flex-wrap align-items-end report-filter-bar">
+                <div style="margin: 0 3px 0 10px;">
+                    <h5 style="margin: 0; font-size: 14px;">Date From</h5>
+                    <input type="date" class="form-control form-control-sm" style="width: 120px;" id="reportFromDate">
+                </div>
+                <div style="margin: 0 10px 0 3px;">
+                    <h5 style="margin: 0; font-size: 14px;">Date To</h5>
+                    <input type="date" class="form-control form-control-sm" style="width: 120px;" id="reportToDate">
+                </div>
+                <button class="btn btn-success btn-sm" style="margin-left: 20px;" data-action="applyReportFilter">Apply</button>
+
+                <div class="btn-group btn-group-sm report-presets" role="group" style="margin-left: 30px;">
+                    <button type="button" class="btn btn-outline-secondary" data-action="applyReportPreset" data-preset="latestMonth">Latest month</button>
+                    <button type="button" class="btn btn-outline-secondary" data-action="applyReportPreset" data-preset="previousMonth">Previous month</button>
+                    <button type="button" class="btn btn-outline-secondary" data-action="applyReportPreset" data-preset="lastThreeMonths">Last 3 months</button>
+                    <button type="button" class="btn btn-outline-secondary" data-action="applyReportPreset" data-preset="financialYear">Financial year</button>
+                    <button type="button" class="btn btn-outline-secondary" data-action="applyReportPreset" data-preset="all">All</button>
+                </div>
+            </div>
+
+            <div class="report-body">
+
+                <div id="reportEmpty" class="card report-card">
+                    <p class="report-empty"><i class="fa-solid fa-circle-info me-2"></i>Load a statement on the Dashboard first.</p>
+                </div>
+
+                <div id="reportContent" class="d-none">
+                    <h4 class="d-none d-print-block report-print-title">Croco Analyst Report</h4>
+                    <p id="reportPeriod" class="report-period"></p>
+
+                    <div id="reportSections">
+
+                        <h5 class="report-group-title">Overview</h5>
+                        <div class="card report-card">
+                            <div id="reportOverview"></div>
+                        </div>
+
+                        <h5 class="report-group-title">Month by month</h5>
+                        <div class="card report-card">
+                            <div id="reportMonthly"></div>
+                        </div>
+
+                        <h5 class="report-group-title">Where the money goes</h5>
+                        <div class="card report-card">
+                            <p class="report-hint" id="reportCategoryHint"></p>
+                            <div id="reportCategories"></div>
+                        </div>
+
+                        <h5 class="report-group-title">Spending habits</h5>
+                        <div class="card report-card">
+                            <div id="reportHabits"></div>
+                        </div>
+
+                        <!-- Merchants and tags, only when the format splits the details -->
+                        <h5 class="report-group-title">Merchants and tags</h5>
+                        <div id="reportSplitNote" class="card report-card d-none">
+                            <p class="report-empty"></p>
+                        </div>
+                        <div id="reportMerchantGrid" class="report-grid">
+                            <div class="card report-card">
+                                <h6>Top merchants by amount</h6>
+                                <div id="reportTopByAmount"></div>
+                            </div>
+                            <div class="card report-card">
+                                <h6>Most frequent merchants</h6>
+                                <div id="reportTopByCount"></div>
+                            </div>
+                            <div class="card report-card">
+                                <h6>Spend by tag</h6>
+                                <div id="reportTags"></div>
+                            </div>
+                            <div class="card report-card">
+                                <h6>New merchants</h6>
+                                <p class="report-hint">Paid in this period and never seen before it in the statement.</p>
+                                <div id="reportNewSources"></div>
+                            </div>
+                            <div class="card report-card report-wide">
+                                <h6>Recurring payments</h6>
+                                <p class="report-hint">Paid to the same merchant for about the same amount (±10%) about once a month, in at least 3 months of the statement, with a payment in this period.</p>
+                                <div id="reportRecurring"></div>
+                            </div>
+                        </div>
+
+                        <h5 class="report-group-title">Large and unusual transactions</h5>
+                        <div class="report-grid">
+                            <div class="card report-card">
+                                <h6>Largest debits</h6>
+                                <div id="reportLargestDebits"></div>
+                            </div>
+                            <div class="card report-card">
+                                <h6>Largest credits</h6>
+                                <div id="reportLargestCredits"></div>
+                            </div>
+                            <div class="card report-card report-wide">
+                                <h6>Unusual transactions</h6>
+                                <p class="report-hint" id="reportOutlierHint"></p>
+                                <div id="reportOutliers"></div>
+                            </div>
+                            <div class="card report-card report-wide">
+                                <h6>Possible duplicates</h6>
+                                <p class="report-hint">Debits on the same day, for the same amount, to the same place.</p>
+                                <div id="reportDuplicates"></div>
+                            </div>
+                        </div>
+
+                        <h5 class="report-group-title">Balance health</h5>
+                        <div class="report-grid">
+                            <div class="card report-card report-wide">
+                                <div class="d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="mb-0">Balance</h6>
+                                    <div class="d-flex flex-row align-items-center report-actions">
+                                        <label for="reportBalanceThreshold" class="me-2" style="font-size: 14px;">Low balance below ₹</label>
+                                        <input type="number" min="0" step="500" class="form-control form-control-sm" style="width: 110px;" id="reportBalanceThreshold" value="5000">
+                                    </div>
+                                </div>
+                                <div id="reportBalance" class="mt-2"></div>
+                            </div>
+                            <div class="card report-card report-wide" id="reportSalaryCard">
+                                <h6>How long the salary lasts</h6>
+                                <p class="report-hint" id="reportSalaryHint"></p>
+                                <div id="reportSalary"></div>
+                            </div>
+                        </div>
+
+                        <h5 class="report-group-title">Data quality</h5>
+                        <div class="card report-card">
+                            <ul id="reportDataQuality" class="report-checks"></ul>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -315,26 +466,16 @@
     <!-- This container is for all the modals {must stay at the bottom}-->
     <div id="modal-container"></div>
 
-    <!-- This script is to load all the modals -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        fetch("modals.html")
-            .then(res => res.text())
-            .then(data => {
-                document.getElementById("modal-container").innerHTML = data;
-            });
-        });
-
-    </script>
-
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
 
     <script src="./node_modules/apexcharts/dist/apexcharts.min.js"></script>
 
     <script src="data.js"></script>
+    <script src="analysis.js"></script>
     <script src="charts.js"></script>
     <script src="renderer.js"></script>
+    <script src="report.js"></script>
 
 </body>
 </html>
